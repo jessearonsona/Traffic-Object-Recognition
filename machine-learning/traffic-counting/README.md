@@ -2,3 +2,4 @@ python tensorflow_cumulative_object_counting.py -m four-classes-vehicle-model\sa
 
 -sp savePath\output.avi 
 -a #flip the line
+
