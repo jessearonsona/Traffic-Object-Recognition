@@ -1,16 +1,16 @@
-//Style is inlined just for practice, move all styling to .css files
-import PropTypes from "prop-types";
-import Button from "./Button";
+import "./Header.css";
+import logo from "./headerLogo.png";
 
 const Header = () => {
   return (
-    <header>
-      <h1 style={{ color: "red" }}>
-        Future home of UGPTI Vehicle Tracking/Road Condition application
-      </h1>
-      <Button color="steelblue" text="Vehicle Tracking" />
-      <Button color="steelblue" text="Road Condition" />
-    </header>
+    <div id="siteHeader">
+        <div id="headerTop">
+            <img src={logo} id="headerLogo" alt="NDSU" />
+        </div>
+        <div id="headerBottom">
+            Upper Great Plains Transportation Institute
+        </div>
+    </div>
   );
 };
 
