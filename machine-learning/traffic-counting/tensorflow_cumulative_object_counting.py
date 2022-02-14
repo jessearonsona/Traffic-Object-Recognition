@@ -3,6 +3,8 @@ import numpy as np
 import argparse
 import tensorflow as tf
 import dlib
+import datetime
+import csv
 
 from object_detection.utils import label_map_util
 from object_detection.utils import ops as utils_ops
@@ -57,14 +59,26 @@ def run_inference_for_single_image(model, image):
 
     return output_dict
 
+def generate_report(report_variables, report_path):
+    with open(report_path, 'w', newline='') as csvfile:
+        fieldnames = ['TimeStamp', 'Class', 'Direction']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        for item in report_variables:
+            writer.writerow({'TimeStamp': item["time_stamp"], 'Class': item["class"], 'Direction': item["direction"]})
+    return
 
-def run_inference(model, category_index, cap, labels, roi_position=0.6, threshold=0.5, x_axis=True, skip_frames=20, save_path='', show=True):  
+def run_inference(model, category_index, cap, labels, roi_position=0.6, threshold=0.5, x_axis=True, skip_frames=20, save_path='', report_path='', show=True):  
     counter = [0, 0, 0, 0]  # left, right, up, down
     total_frames = 0
 
     ct = CentroidTracker(maxDisappeared=40, maxDistance=50)
     trackers = []
     trackableObjects = {}
+
+    # Variables to generate report.csv
+    report_variables = []
+    
 
     # Check if results should be saved
     if save_path:
@@ -126,6 +140,8 @@ def run_inference(model, category_index, cap, labels, roi_position=0.6, threshol
             if to is None:
                 to = TrackableObject(objectID, centroid)
             else:
+                current_time = datetime.datetime.now()
+                current_class = category_index[centroid[2]]["name"]
                 if x_axis and not to.counted:
                     x = [c[0] for c in to.centroids]
                     direction = centroid[0] - np.mean(x)
@@ -133,11 +149,13 @@ def run_inference(model, category_index, cap, labels, roi_position=0.6, threshol
                     if centroid[0] > roi_position*width and direction > 0 and np.mean(x) < args.roi_position*width:
                         counter[1] += 1
                         to.counted = True
-                        print("class: " + category_index[centroid[2]]["name"] + "\ndirection: right")
+                        print("class: " + current_class + "\ndirection: right")
+                        report_variables.append({"time_stamp": current_time, "class": current_class, "direction": "right"})
                     elif centroid[0] < roi_position*width and direction < 0 and np.mean(x) > args.roi_position*width:
                         counter[0] += 1
                         to.counted = True
-                        print("class: " + category_index[centroid[2]]["name"] + "\ndirection: left")
+                        print("class: " + current_class + "\ndirection: left")
+                        report_variables.append({"time_stamp": current_time, "class": current_class, "direction": "left"})
 
                 elif not x_axis and not to.counted:
                     y = [c[1] for c in to.centroids]
@@ -146,11 +164,13 @@ def run_inference(model, category_index, cap, labels, roi_position=0.6, threshol
                     if centroid[1] > roi_position*height and direction > 0 and np.mean(y) < args.roi_position*height:
                         counter[3] += 1
                         to.counted = True
-                        print("class: " + category_index[centroid[2]]["name"] + "\ndirection: down")
+                        print("class: " + current_class + "\ndirection: down")
+                        report_variables.append({"time_stamp": current_time, "class": current_class, "direction": "down"})
                     elif centroid[1] < roi_position*height and direction < 0 and np.mean(y) > args.roi_position*height:
                         counter[2] += 1
                         to.counted = True
-                        print("class: " + category_index[centroid[2]]["name"] + "\ndirection: up")
+                        print("class: " + current_class + "\ndirection: up")
+                        report_variables.append({"time_stamp": current_time, "class": current_class, "direction": "up"})
 
                 to.centroids.append(centroid)
 
@@ -191,9 +211,13 @@ def run_inference(model, category_index, cap, labels, roi_position=0.6, threshol
 
         total_frames += 1
 
+    if report_path:
+        generate_report(report_variables, report_path)
+
     cap.release()
     if save_path:
         out.release()
+    
     cv2.destroyAllWindows()
 
 
@@ -220,6 +244,8 @@ if __name__ == '__main__':
                         action="store_false", help='Show output')
     parser.add_argument('-sp', '--save_path', type=str, default='',
                         help='Path to save the output. If None output won\'t be saved')
+    parser.add_argument('-sr', '--report_path', type=str, default='',
+                        help='Path to save the report. If None report won\'t be saved')
     args = parser.parse_args()
 
     detection_model = load_model(args.model)
@@ -235,4 +261,5 @@ if __name__ == '__main__':
         print("Error opening video stream or file")
 
     run_inference(detection_model, category_index, cap, labels=args.labels, threshold=args.threshold,
-                  roi_position=args.roi_position, x_axis=args.axis, skip_frames=args.skip_frames, save_path=args.save_path, show=args.show)
+                  roi_position=args.roi_position, x_axis=args.axis, skip_frames=args.skip_frames, save_path=args.save_path,
+                   report_path=args.report_path, show=args.show)
