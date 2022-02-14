@@ -4,11 +4,11 @@ import { Typography } from "@mui/material";
 
 const Tracking = () => {
   return (
-    <div className="mainContainer">
+    <div className="container">
       <Header />
-      <body id="body">
+      <main id="mainContent">
         <Typography variant="h5">Vehicle Tracking Page</Typography>
-      </body>
+      </main>
     </div>
   );
 };

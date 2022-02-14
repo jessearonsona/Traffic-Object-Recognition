@@ -4,11 +4,11 @@ import { Typography } from "@mui/material";
 
 const Conditions = () => {
   return (
-    <div className="mainContainer">
+    <div className="container">
       <Header />
-      <body id="body">
+      <main id="mainContent">
         <Typography variant="h5">Road Conditions Page</Typography>
-      </body>
+      </main>
     </div>
   );
 };
