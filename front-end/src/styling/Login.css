@@ -1,0 +1,51 @@
+#formGrid {
+  padding-top: 15px;
+  padding-left: 100px;
+  padding-right: 20px;
+  padding-bottom: 20px;
+}
+#image {
+  height: 375px;
+}
+
+#imagePaper {
+  box-shadow: none;
+  align-items: center;
+}
+
+#loginButton {
+  background-color: "secondary";
+  color: #484848;
+  font-size: large;
+}
+
+#mainContent {
+  margin-top: 70px;
+}
+#outerGrid {
+  padding-top: 50px;
+  padding-left: 100px;
+  padding-right: 80px;
+  align-items: center;
+}
+
+#spacer {
+  color: #ffffff;
+}
+
+#subtext {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  color: #525050;
+}
+
+#textfield {
+  color: primary;
+  display: "flex";
+  margin-left: 10px;
+}
+
+#title {
+  font-weight: 600;
+  color: #525050;
+}
