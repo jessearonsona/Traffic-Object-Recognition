@@ -1,7 +1,7 @@
 import "../styling/Login.css";
 import Header from "../components/Header";
-import Image from "./pexels-dani-muchow-2955704.jpg";
-import { Box, Button, Grid, Paper, TextField, Typography } from "@mui/material";
+import Image from "./caleb-george-URmkfvtK3Qw-unsplash.jpg";
+import { Button, Grid, Paper, TextField, Typography } from "@material-ui/core";
 import { Person, VpnKey } from "@mui/icons-material";
 
 const Login = () => {
@@ -55,7 +55,7 @@ const Login = () => {
               <Typography id="subtext" variant="h6">
                 Forgot Password?
               </Typography>
-              <Button id="loginButton" variant="contained" color="primary">
+              <Button id="loginButton" variant="contained" color="secondary">
                 Login
               </Button>
             </Grid>

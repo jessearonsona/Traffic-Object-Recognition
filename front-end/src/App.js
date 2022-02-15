@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { createTheme } from "@material-ui/core/styles";
-import { ThemeProvider } from "@material-ui/core";
+import { createTheme, ThemeProvider } from "@material-ui/core";
 import Login from "./pages/Login";
 import Tracking from "./pages/Tracking";
 import Conditions from "./pages/Conditions";
