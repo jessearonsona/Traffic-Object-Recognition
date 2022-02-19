@@ -1,0 +1,13 @@
+#buttonContainer {
+  margin-top: 315px;
+}
+
+#buttonGrid {
+  display: flexbox;
+  justify-content: flex-end;
+}
+
+#cancelButton {
+  border-width: 1.5px;
+  margin-right: 10px;
+}
