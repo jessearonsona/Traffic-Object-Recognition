@@ -1,4 +1,5 @@
-// Move styling from Subheader.css to TrackingAndCondtions.css when integrating with Vincent's part
+// TODO: Move styling from Subheader.css to TrackingAndCondtions.css when integrating with
+// Vincent's part, remove code blocks used for testing
 import {
   Button,
   ButtonGroup,
@@ -7,16 +8,22 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  Typography,
 } from "@material-ui/core";
 import { useLocation } from "react-router-dom";
+import { useState } from "react";
+import roads from "../arrays/roads";
 import "../styling/TrackingAndConditions.css";
 import "./Subheader.css";
 
-// Need to put road/intersection dropdown options in a data structure and map it
-
 const Subheader = () => {
+  // Get current page to use for conditional rendering
   const location = useLocation();
   const pathname = location.pathname;
+
+  // Get selection from roads dropdown
+  const [value, setValue] = useState("");
+  const handleChange = (e) => setValue(e.target.value);
 
   // Function to change the variant of the page selector buttons depending on which
   // page is currently selected
@@ -60,19 +67,25 @@ const Subheader = () => {
             <Select
               labelId="roadDropdownLabel"
               id="roadDropdown"
-              //   value={road}
-              //   onChange={handleChange}
+              value={value}
+              onChange={handleChange}
               label="Road/Intersection"
             >
-              <MenuItem value="">
-                <em>None</em>
-              </MenuItem>
-              <MenuItem value={1}>I-94</MenuItem>
-              <MenuItem value={2}>I-29</MenuItem>
-              <MenuItem value={3}>Calgary & State Street</MenuItem>
+              {roads.map((road, index) => {
+                return (
+                  <MenuItem key={index} value={index}>
+                    {road}
+                  </MenuItem>
+                );
+              })}
             </Select>
           </FormControl>
         </Grid>
+        {/* -----------------!!! REMOVE AFTER TESTING !!!----------------- */}
+        {/* <Grid item xs={12}>
+          <Typography align="center">You Selected: {roads[value]}</Typography>
+        </Grid> */}
+        {/* -------------------------------------------------------------- */}
       </Grid>
     </div>
   );

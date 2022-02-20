@@ -1,5 +1,5 @@
 #buttonContainer {
-  margin-top: 315px;
+  margin-top: 290px;
 }
 
 #buttonGrid {
@@ -9,5 +9,9 @@
 
 #cancelButton {
   border-width: 1.5px;
+  margin-right: 10px;
+}
+
+#startButton {
   margin-right: 10px;
 }
