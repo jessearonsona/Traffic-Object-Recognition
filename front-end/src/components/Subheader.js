@@ -62,10 +62,10 @@ const Subheader = () => {
         </Grid>
 
         <Grid item xs={12} id="roadSelector">
-          <FormControl id="dropDownBox" variant="outlined" size="small">
-            <InputLabel id="roadDropdownLabel">Road/Intersection</InputLabel>
+          <FormControl id="dropdownBox" variant="outlined" size="small">
+            <InputLabel id="dropdownLabel">Road/Intersection</InputLabel>
             <Select
-              labelId="roadDropdownLabel"
+              labelId="dropdownLabel"
               id="roadDropdown"
               value={value}
               onChange={handleChange}

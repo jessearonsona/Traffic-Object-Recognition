@@ -1,5 +1,6 @@
 #buttonContainer {
-  margin-top: 290px;
+  margin-top: 30px;
+  margin-bottom: 30px;
 }
 
 #buttonGrid {
@@ -13,5 +14,5 @@
 }
 
 #startButton {
-  margin-right: 10px;
+  margin-right: 30px;
 }
