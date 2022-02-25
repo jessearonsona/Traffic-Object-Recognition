@@ -1,22 +1,40 @@
 #siteHeader {
- height: 50px;
- font-family: Arial;
+  height: 50px;
+  font-family: Arial;
 }
 
 #headerTop {
- background-color: #18563E;
+  background-color: #18563e;
 }
 
 #headerBottom {
- background-color: #484848;
- color: white;
- padding: 10px;
+  background-color: #484848;
+  color: white;
+  padding: 10px;
 }
 
 #headerLogo {
- height: 60px;
- cursor: pointer;
- color: yellow;
- font-weight: bold;
- font-size: 20px;
+  height: 60px;
+  cursor: pointer;
+  color: yellow;
+  font-weight: bold;
+  font-size: 20px;
+}
+
+#usernameLogo {
+  height: 60px;
+  cursor: pointer;
+  color: yellow;
+  font-weight: bold;
+  font-size: 20px;
+}
+
+#accountIcon {
+  float: right;
+  color: #ffd033;
+  border: none;
+  /*background-color: transparent;*/
+  cursor: pointer;
+  margin: 18px;
+  padding: 0;
 }
