@@ -1,45 +1,56 @@
-#formGrid {
-  padding-top: 15px;
-  padding-left: 100px;
-  padding-right: 20px;
-  padding-bottom: 20px;
-}
-#image {
-  height: 375px;
+#forgotPWButton {
+  size: large;
+  background-color: transparent;
+  color: #525050;
+  font-size: 20px;
+  text-transform: none;
 }
 
-#imagePaper {
-  box-shadow: none;
-  align-items: center;
+#formGrid {
+  padding-top: 20px;
+  padding-bottom: 30px;
+  display: flex;
+  justify-content: center;
+}
+
+#image {
+  height: 450px;
+  max-width: 100%;
+  object-fit: contain;
 }
 
 #loginButton {
+  min-width: 300px;
   background-color: "secondary";
   color: #484848;
   font-size: large;
 }
 
+#loginButton:hover {
+  background-color: #ffd033;
+}
+
 #mainContent {
   margin-top: 70px;
 }
-#outerGrid {
-  padding-top: 50px;
-  padding-left: 100px;
-  padding-right: 80px;
-  align-items: center;
-}
 
-#spacer {
-  color: #ffffff;
+#outerGrid {
+  padding-top: 15vh;
+  padding-left: 10px;
+  padding-right: 10px;
+  align-items: center;
+  justify-content: center;
 }
 
 #subtext {
-  padding-top: 10px;
   padding-bottom: 10px;
   color: #525050;
 }
 
 #textfield {
+  min-width: 250px;
+  padding-top: 12px;
+  padding-bottom: 12px;
   color: primary;
   display: "flex";
   margin-left: 10px;
@@ -48,4 +59,36 @@
 #title {
   font-weight: 600;
   color: #525050;
+}
+
+/*******************************************************************/
+/*Styling adjustments for responsiveness to different screen sizes */
+
+@media screen and (max-width: 699px) {
+  #imageContainer {
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+  #image {
+    max-height: 240px;
+  }
+  #outerGrid {
+    padding-top: 0px;
+  }
+}
+
+@media screen and (min-width: 700px) and (max-width: 1499px) {
+  #outerGrid {
+    margin-left: 40px;
+    padding-top: 10px;
+  }
+}
+
+@media screen and (min-width: 1500px) {
+  #formContainer {
+    padding-right: 200px;
+  }
+  #imageContainer {
+    margin-left: 20px;
+  }
 }

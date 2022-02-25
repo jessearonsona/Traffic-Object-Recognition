@@ -1,7 +1,8 @@
+//TODO: Wrap login side in a form, import password field to hide typing
 import "../styling/Login.css";
 import Header from "../components/Header";
-import Image from "./caleb-george-URmkfvtK3Qw-unsplash.jpg";
-import { Button, Grid, Paper, TextField, Typography } from "@material-ui/core";
+import Image from "../assets/caleb-george-URmkfvtK3Qw-unsplash.jpg";
+import { Button, Grid, TextField, Typography } from "@material-ui/core";
 import { Person, VpnKey } from "@mui/icons-material";
 
 const Login = () => {
@@ -9,56 +10,72 @@ const Login = () => {
     <div className="container">
       <Header />
       <main id="mainContent">
-        <Grid container id="outerGrid">
-          <Grid item xs={12} sm={6} justify="center">
-            <Paper id="imagePaper" align="center">
-              <img src={Image} id="image" />
-            </Paper>
+        <Grid container id="outerGrid" justifyContent="center">
+          <Grid item xs={0} sm={1} med={2}>
+            {/* spacer */}
           </Grid>
-          <Grid item xs={12} sm={6} direction="column" align="center">
+          <Grid item xs={12} sm={5} med={4} id="imageContainer" align="center">
+            <img src={Image} alt="" id="image" />
+          </Grid>
+
+          <Grid item xs={12} sm={5} med={4} id="formContainer" align="center">
             <Grid
               container
               id="formGrid"
               direction="column"
               display="flex"
-              justify="center"
+              justifyContent="center"
+              spacing={2}
             >
-              <Typography id="title" variant="h4">
-                WELCOME TO UGPTI
-              </Typography>
+              <Grid item>
+                <Typography id="title" variant="h4">
+                  WELCOME TO UGPTI
+                </Typography>
+              </Grid>
 
-              <Typography id="subtext" variant="h6">
-                Login to continue
-              </Typography>
+              <Grid item>
+                <Typography id="subtext" variant="h6">
+                  Login to continue
+                </Typography>
+              </Grid>
 
-              <TextField
-                id="textfield"
-                variant="outlined"
-                label="username"
-                InputProps={{
-                  startAdornment: <Person />,
-                }}
-              ></TextField>
-              <Typography id="spacer" variant="subtitle2">
-                spacer
-              </Typography>
+              <Grid item>
+                <TextField
+                  id="textfield"
+                  variant="outlined"
+                  label="username"
+                  InputProps={{
+                    startAdornment: <Person />,
+                  }}
+                ></TextField>
+              </Grid>
 
-              <TextField
-                id="textfield"
-                variant="outlined"
-                label="password"
-                InputProps={{
-                  startAdornment: <VpnKey />,
-                }}
-              ></TextField>
+              <Grid item>
+                <TextField
+                  id="textfield"
+                  variant="outlined"
+                  label="password"
+                  InputProps={{
+                    startAdornment: <VpnKey />,
+                  }}
+                ></TextField>
+              </Grid>
 
-              <Typography id="subtext" variant="h6">
-                Forgot Password?
-              </Typography>
-              <Button id="loginButton" variant="contained" color="secondary">
-                Login
-              </Button>
+              <Grid item>
+                <Button id="forgotPWButton" disableRipple>
+                  Forgot Password?
+                </Button>
+              </Grid>
+
+              <Grid item>
+                <Button id="loginButton" variant="contained" color="secondary">
+                  Login
+                </Button>
+              </Grid>
             </Grid>
+          </Grid>
+          <Grid item xs={0} sm={1} med={2}>
+            {/* spacer */}
           </Grid>
         </Grid>
       </main>
