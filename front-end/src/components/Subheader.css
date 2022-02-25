@@ -1,0 +1,30 @@
+#pageSelector {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#RCBtn {
+  border-width: 1.5px;
+}
+#roadDropdown {
+  min-width: 200px;
+  background-color: white;
+}
+#roadSelector {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#subheaderContainer {
+  margin-top: 30px;
+}
+#subheaderGrid {
+  display: flexbox;
+  justify-content: center;
+}
+#VTBtn {
+  border-width: 1.5px;
+}
