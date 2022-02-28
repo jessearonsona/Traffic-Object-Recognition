@@ -3,6 +3,7 @@ import { createTheme, ThemeProvider } from "@material-ui/core";
 import Login from "./pages/Login";
 import Tracking from "./pages/Tracking";
 import Conditions from "./pages/Conditions";
+import Home from "./pages/Home";
 
 const theme = createTheme({
   palette: {
@@ -23,6 +24,7 @@ function App() {
           <Route path="/" element={<Login />} />
           <Route path="/tracking" element={<Tracking />} />
           <Route path="/conditions" element={<Conditions />} />
+          <Route path="/home" element={<Home />} />
         </Routes>
       </Router>
     </ThemeProvider>
