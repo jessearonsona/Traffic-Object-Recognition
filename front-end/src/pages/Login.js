@@ -19,60 +19,66 @@ const Login = () => {
           </Grid>
 
           <Grid item xs={12} sm={5} med={4} id="formContainer" align="center">
-            <Grid
-              container
-              id="formGrid"
-              direction="column"
-              display="flex"
-              justifyContent="center"
-              spacing={2}
-            >
-              <Grid item>
-                <Typography id="title" variant="h4">
-                  WELCOME TO UGPTI
-                </Typography>
-              </Grid>
+            <form>
+              <Grid
+                container
+                id="formGrid"
+                direction="column"
+                display="flex"
+                justifyContent="center"
+                spacing={2}
+              >
+                <Grid item>
+                  <Typography id="title" variant="h4">
+                    WELCOME TO UGPTI
+                  </Typography>
+                </Grid>
 
-              <Grid item>
-                <Typography id="subtext" variant="h6">
-                  Login to continue
-                </Typography>
-              </Grid>
+                <Grid item>
+                  <Typography id="subtext" variant="h6">
+                    Login to continue
+                  </Typography>
+                </Grid>
 
-              <Grid item>
-                <TextField
-                  id="textfield"
-                  variant="outlined"
-                  label="username"
-                  InputProps={{
-                    startAdornment: <Person />,
-                  }}
-                ></TextField>
-              </Grid>
+                <Grid item>
+                  <TextField
+                    id="textfield"
+                    variant="outlined"
+                    label="username"
+                    InputProps={{
+                      startAdornment: <Person />,
+                    }}
+                  ></TextField>
+                </Grid>
 
-              <Grid item>
-                <TextField
-                  id="textfield"
-                  variant="outlined"
-                  label="password"
-                  InputProps={{
-                    startAdornment: <VpnKey />,
-                  }}
-                ></TextField>
-              </Grid>
+                <Grid item>
+                  <TextField
+                    id="passwordField"
+                    variant="outlined"
+                    label="password"
+                    InputProps={{
+                      startAdornment: <VpnKey />,
+                    }}
+                  ></TextField>
+                </Grid>
 
-              <Grid item>
-                <Button id="forgotPWButton" disableRipple>
-                  Forgot Password?
-                </Button>
-              </Grid>
+                <Grid item>
+                  <Button id="forgotPWButton" disableRipple>
+                    Forgot Password?
+                  </Button>
+                </Grid>
 
-              <Grid item>
-                <Button id="loginButton" variant="contained" color="secondary">
-                  Login
-                </Button>
+                <Grid item>
+                  <Button
+                    id="loginButton"
+                    variant="contained"
+                    color="secondary"
+                  >
+                    Login
+                  </Button>
+                </Grid>
               </Grid>
-            </Grid>
+            </form>
           </Grid>
           <Grid item xs={0} sm={1} med={2}>
             {/* spacer */}

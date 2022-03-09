@@ -21,19 +21,10 @@
   font-size: 20px;
 }
 
-#usernameLogo {
-  height: 60px;
-  cursor: pointer;
-  color: yellow;
-  font-weight: bold;
-  font-size: 20px;
-}
-
 #accountIcon {
   float: right;
   color: #ffd033;
   border: none;
-  /*background-color: transparent;*/
   cursor: pointer;
   margin: 18px;
   padding: 0;
