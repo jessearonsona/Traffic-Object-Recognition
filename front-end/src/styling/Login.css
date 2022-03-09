@@ -42,6 +42,16 @@
   justify-content: center;
 }
 
+#passwordField {
+  min-width: 250px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  color: primary;
+  display: "flex";
+  margin-left: 10px;
+  -webkit-text-security: disc;
+}
+
 #subtext {
   padding-bottom: 10px;
   color: #525050;
