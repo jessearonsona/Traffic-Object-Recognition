@@ -7,8 +7,11 @@ import OptionPane from "../components/OptionPane";
 import { Button, Container, Grid, Input, Typography } from "@material-ui/core";
 import Webcam from "react-webcam";
 import AddIcon from "@mui/icons-material/Add";
+import {useState} from "react";
+import CameraAltIcon from '@mui/icons-material/CameraAlt';
 
 const Conditions = () => {
+  const [showWebcam, setShowWebcam] = useState(false);
   //Compatible file types
   const imageTypes = ["jpg", "jpeg", "png"];
   const videoTypes = ["mp4", "mkv", "wmv", "mov"];
@@ -56,6 +59,12 @@ const Conditions = () => {
     }
   }
 
+  function displayWebcam()
+  {
+    setShowWebcam(true);
+    document.getElementById("cameraConnect").style.display = "none";
+  }
+
   return (
     <div className="container">
       <Header />
@@ -78,34 +87,54 @@ const Conditions = () => {
                     <Typography id="label-header" variant="h4">
                       Live Camera
                     </Typography>
-                    <Webcam id="webcamVideo" audio={false} mirrored={true} />
+                    <div id="cameraConnect">
+                      <Button
+                          id="connect-button"
+                          variant="contained"
+                          color="primary"
+                          component="span"
+                          startIcon={<CameraAltIcon />}
+                          onClick={displayWebcam}
+                          style={{ marginTop: "100px" }}
+                        >
+                          Connect
+                        </Button>
+                    </div>
+                    {showWebcam &&
+                      <Webcam id="webcamVideo" src="" audio={false} mirrored={true} />
+                    }
                   </Container>
                 </Grid>
-                <Grid item direction="column" justifyContent="center">
+                <Grid item direction="column" justifyContent="center" id="dividerGrid">
                   <Container>
                     <div id="divider" />
                   </Container>
                 </Grid>
                 <Grid item direction="column" justifyContent="center">
+                  <Container>
+                    <div id="dividerHorizontal" />
+                  </Container>
                   <Typography id="label-header" variant="h4">
                     Upload Image or Video
                   </Typography>
                   <Container id="uploadContainer">
-                    <video
-                      className={"preview"}
-                      id="videoPreview"
-                      controls
-                      style={{ display: "none" }}
-                    >
-                      <source id="video-source" src="splashVideo" />
-                      Your browser does not support HTML5 video.
-                    </video>
-                    <img
-                      src="splashImage"
-                      id="imagePreview"
-                      className={"preview"}
-                      style={{ display: "none" }}
-                    />
+                    <div id="previewDiv">
+                      <video
+                        className={"preview"}
+                        id="videoPreview"
+                        controls
+                        style={{ display: "none", maxWidth: "400px", maxHeight: "300px" }}
+                      >
+                        <source id="video-source" src="splashVideo" />
+                        Your browser does not support HTML5 video.
+                      </video>
+                      <img
+                        src="splashImage"
+                        id="imagePreview"
+                        className={"preview"}
+                        style={{ display: "none", maxWidth: "400px", maxHeight: "300px" }}
+                      />
+                    </div>
                     <div id="center">
                       <label htmlFor="file-upload">
                         <Input
