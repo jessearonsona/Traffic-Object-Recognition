@@ -189,13 +189,6 @@ class Tracking extends React.Component {
   buildDetectedObjects(scores, threshold, boxes, classes, classesDir) {
     const detectionObjects = [];
     var video_frame = document.getElementById("webcamVideo");
-    // DEBUG
-    //console.log('classes')
-    //console.log(classes)
-    //console.log('boxes')
-    //console.log(boxes)
-    //console.log('scores')
-    //console.log(scores)
 
     scores[0].forEach((score, i) => {
       if (score > threshold) {
@@ -229,34 +222,6 @@ class Tracking extends React.Component {
     ctx.textBaseline = "top";
 
     //Getting predictions
-
-    // DEBUG
-    //console.log('predictions')
-    //console.log(predictions)
-
-    console.log("predictions 0");
-    console.log(predictions[0].arraySync());
-
-    console.log("predictions 1");
-    console.log(predictions[1].arraySync());
-
-    console.log("predictions 2");
-    console.log(predictions[2].arraySync());
-
-    console.log("predictions 3");
-    console.log(predictions[3].arraySync());
-
-    console.log("predictions 4");
-    console.log(predictions[4].arraySync());
-
-    console.log("predictions 5");
-    console.log(predictions[5].arraySync());
-
-    console.log("predictions 6");
-    console.log(predictions[6].arraySync());
-
-    console.log("predictions 7");
-    console.log(predictions[7].arraySync());
 
     // Kangaroo Model
     //const boxes = predictions[0].arraySync();
@@ -366,7 +331,7 @@ class Tracking extends React.Component {
                         <Webcam ref={webcamRef} muted={true} id="trackCam" />
                         <canvas ref={canvasRef} id="trackCanvas" />
                       */}
-                      <div style={{ position: "relative", top: 0, left: 0 }}>
+                      <div>
                         <video
                           style={{ height: "600px", width: "500px" }}
                           className="size"
