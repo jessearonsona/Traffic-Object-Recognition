@@ -52,14 +52,19 @@
   height: 480;
 }
 
-#trackCanvas {
-  position: "absolute";
-  marginleft: "auto";
-  marginright: "auto";
+.size {
+  position: absolute;
+  top: 0;
   left: 0;
-  right: 0;
-  textalign: "center";
-  zindex: 8;
-  width: 640;
-  height: 480;
 }
+/*#trackCanvas {         */
+/*  position: "absolute";*/
+/*  marginleft: "auto";  */
+/*  marginright: "auto"; */
+/*  left: 0;             */
+/*  right: 0;            */
+/*  textalign: "center"; */
+/*  zindex: 8;           */
+/*  width: 640;          */
+/*  height: 480;         */
+/*}                      */
