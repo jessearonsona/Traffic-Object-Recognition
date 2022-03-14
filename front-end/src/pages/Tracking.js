@@ -45,21 +45,22 @@ const threshold = 0.5;
 //},
 //};
 
+// TODO: validate labels for 4 class model
 let classesDir = {
   1: {
-    name: "car",
+    name: "Passenger",
     id: 1,
   },
   2: {
-    name: "car",
+    name: "Bus",
     id: 2,
   },
   3: {
-    name: "car",
+    name: "Single Unit Truck",
     id: 3,
   },
   4: {
-    name: "car",
+    name: "Multi Unit Truck",
     id: 4,
   },
 };
