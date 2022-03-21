@@ -5,13 +5,13 @@
 //       4) Auto-quit when time to run model has elapsed or when recorded video is complete
 //       5) Components to show results for recorded video or still image with option to send to DB?
 
-import React, { useRef, useState, useEffect } from "react";
-import ReactDOM from "react-dom";
+import React, { useState } from "react";
 import { Button, Container, Grid, Input, Typography } from "@material-ui/core";
+import Webcam from "react-webcam";
 import { loadGraphModel } from "@tensorflow/tfjs-converter";
 
-import Webcam from "react-webcam";
 import AddIcon from "@mui/icons-material/Add";
+import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import * as tf from "@tensorflow/tfjs";
 
 import "../styling/TrackingAndConditions.css";
@@ -22,30 +22,19 @@ import OptionPane from "../components/OptionPane";
 
 tf.setBackend("webgl");
 
-async function load_model() {
+const load_model = async () => {
   // It's possible to load the model locally or from a repo
   // You can choose whatever IP and PORT you want in the "http://127.0.0.1:8080/model.json" just set it before in your https server
   const model = await loadGraphModel("http://127.0.0.1:8080/model.json");
   //const model = await loadGraphModel(
   //"https://raw.githubusercontent.com/hugozanini/TFJS-object-detection/master/models/kangaroo-detector/model.json"
   //);
+  
+  console.log("model loaded")
   return model;
-}
+};
 
 const threshold = 0.5;
-// Kangaroo Map
-//let classesDir = {
-//1: {
-//name: "Kangaroo",
-//id: 1,
-//},
-//2: {
-//name: "Other",
-//id: 2,
-//},
-//};
-import {useState} from "react";
-import CameraAltIcon from '@mui/icons-material/CameraAlt';
 
 // TODO: validate labels for 4 class model
 let classesDir = {
@@ -67,86 +56,71 @@ let classesDir = {
   },
 };
 
-//Called when file is uploaded
-function upload(event) {
-  const [showWebcam, setShowWebcam] = useState(false);
-  //Compatible file types
-  const imageTypes = ["png", "jpg", "jpeg"];
-  const videoTypes = ["mp4", "mkv", "wmv", "mov"];
-
-  var videoSrc = document.getElementById("video-source");
-  var videoTag = document.getElementById("videoPreview");
-  var imgTag = document.getElementById("imagePreview");
-
-  //Checks if a file is uploaded
-  if (event.target.files && event.target.files[0]) {
-    var extension = event.target.files[0].name.split(".").pop().toLowerCase();
-    var reader = new FileReader();
-
-    //If file is image
-    if (imageTypes.includes(extension)) {
-      reader.onload = function (e) {
-        imgTag.src = e.target.result;
-      }.bind(this);
-      imgTag.style.display = "block";
-      videoTag.style.display = "none";
-      document.getElementById("upload-button").style.marginTop = "5px";
-    }
-
-    //If file is video
-    else if (videoTypes.includes(extension)) {
-      reader.onload = function (e) {
-        videoSrc.src = e.target.result;
-        videoTag.load();
-      }.bind(this);
-      videoTag.style.display = "block";
-      imgTag.style.display = "none";
-      document.getElementById("upload-button").style.marginTop = "5px";
-    }
-
-    //Incompatible type
-    else {
-      var error = "Incompatible file type.\nCompatible file types:\n";
-      error += imageTypes.join(", ") + ", " + videoTypes.join(", ");
-      alert(error);
-    }
-
-    reader.readAsDataURL(event.target.files[0]);
-  }
-}
-
-  function displayWebcam()
-  {
-    setShowWebcam(true);
-    document.getElementById("cameraConnect").style.display = "none";
-  }
-
-const drawRect = (detections, ctx) => {
-  // Loop through each prediction
-  detections.forEach((prediction) => {
-    // Extract boxes and classes
-    const [x, y, width, height] = prediction["bbox"];
-    const text = prediction["class"];
-
-    // Set styling
-    const color = Math.floor(Math.random() * 16777215).toString(16);
-    ctx.strokeStyle = "#" + color;
-    ctx.font = "18px Arial";
-
-    // Draw rectangles and text
-    ctx.beginPath();
-    ctx.fillStyle = "#" + color;
-    ctx.fillText(text, x, y);
-    ctx.rect(x, y, width, height);
-    ctx.stroke();
-  });
-};
-
 class Tracking extends React.Component {
-  videoRef = React.createRef();
-  canvasRef = React.createRef();
+  constructor(props) {
+    super(props);
+    this.videoRef = React.createRef();
+    this.canvasRef = React.createRef();
 
-  componentDidMount() {
+    this.imageTypes = ["jpg", "jpeg", "png"];
+    this.videoTypes = ["mp4", "mkv", "wmv", "mov"];
+
+    this.state = {
+      showWebcam: false,
+    };
+  }
+
+  //Called when file is uploaded
+  upload(event) {
+    var videoSrc = document.getElementById("video-source");
+    var videoTag = document.getElementById("videoPreview");
+    var imgTag = document.getElementById("imagePreview");
+
+    //Checks if a file is uploaded
+    if (event.target.files && event.target.files[0]) {
+      var extension = event.target.files[0].name.split(".").pop().toLowerCase();
+      var reader = new FileReader();
+
+      //If file is image
+      if (this.imageTypes.includes(extension)) {
+        reader.onload = function (e) {
+          imgTag.src = e.target.result;
+        }.bind(this);
+        imgTag.style.display = "block";
+        videoTag.style.display = "none";
+        document.getElementById("upload-button").style.marginTop = "5px";
+      }
+
+      //If file is video
+      else if (this.videoTypes.includes(extension)) {
+        reader.onload = function (e) {
+          videoSrc.src = e.target.result;
+          videoTag.load();
+        }.bind(this);
+        videoTag.style.display = "block";
+        imgTag.style.display = "none";
+        document.getElementById("upload-button").style.marginTop = "5px";
+      }
+
+      //Incompatible type
+      else {
+        var error = "Incompatible file type.\nCompatible file types:\n";
+        error += this.imageTypes.join(", ") + ", " + this.videoTypes.join(", ");
+        alert(error);
+      }
+
+      reader.readAsDataURL(event.target.files[0]);
+    }
+  }
+
+  displayWebcam = () => {
+    this.setState({ showWebcam: true });
+    console.log("Showing webcam");
+    document.getElementById("cameraConnect").style.display = "none";
+    this.runModelDetections();
+  }
+
+  runModelDetections = () => {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       const webCamPromise = navigator.mediaDevices
         .getUserMedia({
@@ -156,6 +130,7 @@ class Tracking extends React.Component {
           },
         })
         .then((stream) => {
+          console.log("Got camera stream")
           window.stream = stream;
           this.videoRef.current.srcObject = stream;
           return new Promise((resolve, reject) => {
@@ -167,15 +142,29 @@ class Tracking extends React.Component {
 
       const modelPromise = load_model();
 
+      console.log("Awaiting webcam and model...")
       Promise.all([modelPromise, webCamPromise])
         .then((values) => {
-          console.log("promise met");
+          console.log("Model and webcam loaded");
+          this.setCanvasPosition();
           this.detectFrame(this.videoRef.current, values[0]);
         })
         .catch((error) => {
           console.error(error);
         });
     }
+  }
+
+  setCanvasPosition = () => {
+    console.log("Setting canvas position")
+    let rect = this.videoRef.current.getBoundingClientRect();
+    console.log(rect)
+    let ref = this.canvasRef.current;
+
+
+    ref.width = rect.width;
+    ref.height = rect.height;
+    ref.className = "canvas";
   }
 
   detectFrame = (video, model) => {
@@ -232,11 +221,6 @@ class Tracking extends React.Component {
 
     //Getting predictions
 
-    // Kangaroo Model
-    //const boxes = predictions[0].arraySync();
-    //const scores = predictions[4].arraySync();
-    //const classes = predictions[5].dataSync();
-
     // Car Model 4 classes
     const boxes = predictions[2].arraySync();
     // [4] could be scores [[float; 5]; 100]. [7] could be scores [float; 100]
@@ -286,34 +270,7 @@ class Tracking extends React.Component {
     });
   };
 
-  // example
-  //render() {
-  //  return (
-  //    <div>
-  //      <h1>Real-Time Object Detection: Kangaroo</h1>
-  //      <h3>MobileNetV2</h3>
-  //      <video
-  //        style={{ height: "600px", width: "500px" }}
-  //        className="size"
-  //        autoPlay
-  //        playsInline
-  //        muted
-  //        ref={this.videoRef}
-  //        width="600"
-  //        height="500"
-  //        id="webcamVideo"
-  //      />
-  //      <canvas
-  //        className="size"
-  //        ref={this.canvasRef}
-  //        width="600"
-  //        height="500"
-  //      />
-  //    </div>
-  //  );
-  //}
-
-  render() {
+  render = () => {
     return (
       <div className="container">
         <Header />
@@ -336,83 +293,86 @@ class Tracking extends React.Component {
                       <Typography id="label-header" variant="h4">
                         Live Camera
                       </Typography>
-                      {/*
-                        <Webcam ref={webcamRef} muted={true} id="trackCam" />
-                        <canvas ref={canvasRef} id="trackCanvas" />
-                      */}
-                      <div>
-                        <video
-                          style={{ height: "600px", width: "500px" }}
-                          className="size"
-                          autoPlay
-                          playsInline
-                          muted
-                          ref={this.videoRef}
-                          width="600"
-                          height="500"
-                          id="webcamVideo"
-                        />
-                        <canvas
-                          className="size"
-                          ref={this.canvasRef}
-                          width="600"
-                          height="500"
-                        />
-                      </div>
-                    <div id="cameraConnect">
-                      <Button
+                      <div id="cameraConnect">
+                        <Button
                           id="connect-button"
                           variant="contained"
                           color="primary"
                           component="span"
                           startIcon={<CameraAltIcon />}
-                          onClick={displayWebcam}
+                          onClick={this.displayWebcam}
                           style={{ marginTop: "100px" }}
                         >
                           Connect
                         </Button>
-                    </div>
-                    {showWebcam &&
-                      <Webcam id="webcamVideo" src="" audio={false} mirrored={true} />
-                    }
+                      </div>
+                      {this.state.showWebcam && (
+                        <div className="trackerContainer">
+                          <video
+                            id="webcamVideo"
+                            className="trackerVideo"
+                            autoPlay
+                            playsInLine
+                            muted
+                            ref={this.videoRef}
+                          />
+                          <canvas
+                            classname="canvas"
+                            ref={this.canvasRef}
+                          />
+                        </div>
+                      )}
                     </Container>
                   </Grid>
-                <Grid item direction="column" justifyContent="center" id="dividerGrid">
+                  <Grid
+                    item
+                    direction="column"
+                    justifyContent="center"
+                    id="dividerGrid"
+                  >
                     <Container>
                       <div id="divider" />
                     </Container>
                   </Grid>
                   <Grid item direction="column" justifyContent="center">
-                  <Container>
-                    <div id="dividerHorizontal" />
-                  </Container>
+                    <Container>
+                      <div id="dividerHorizontal" />
+                    </Container>
                     <Typography id="label-header" variant="h4">
                       Upload Image or Video
                     </Typography>
                     <Container id="uploadContainer">
-                    <div id="previewDiv">
-                      <video
-                        className={"preview"}
-                        id="videoPreview"
-                        controls
-                        style={{ display: "none", maxWidth: "400px", maxHeight: "300px" }}
-                      >
-                        <source id="video-source" src="splashVideo" />
-                        Your browser does not support HTML5 video.
-                      </video>
-                      <img
-                        src="splashImage"
-                        id="imagePreview"
-                        className={"preview"}
-                        style={{ display: "none", maxWidth: "400px", maxHeight: "300px" }}
-                      />
-                    </div>
+                      <div id="previewDiv">
+                        <video
+                          className={"preview"}
+                          id="videoPreview"
+                          controls
+                          style={{
+                            display: "none",
+                            maxWidth: "400px",
+                            maxHeight: "300px",
+                          }}
+                        >
+                          <source id="video-source" src="splashVideo" />
+                          Your browser does not support HTML5 video.
+                        </video>
+                        <img
+                          src="splashImage"
+                          id="imagePreview"
+                          className={"preview"}
+                          style={{
+                            display: "none",
+                            maxWidth: "400px",
+                            maxHeight: "300px",
+                          }}
+                        />
+                      </div>
                       <div id="center">
                         <label htmlFor="file-upload">
                           <Input
                             accept="Video/*,Image/*"
                             id="file-upload"
-                            onChange={upload}
+                            onChange={this.upload}
                             multiple
                             type="file"
                             value={""}

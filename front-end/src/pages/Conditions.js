@@ -7,8 +7,8 @@ import OptionPane from "../components/OptionPane";
 import { Button, Container, Grid, Input, Typography } from "@material-ui/core";
 import Webcam from "react-webcam";
 import AddIcon from "@mui/icons-material/Add";
-import {useState} from "react";
-import CameraAltIcon from '@mui/icons-material/CameraAlt';
+import { useState } from "react";
+import CameraAltIcon from "@mui/icons-material/CameraAlt";
 
 const Conditions = () => {
   const [showWebcam, setShowWebcam] = useState(false);
@@ -59,8 +59,7 @@ const Conditions = () => {
     }
   }
 
-  function displayWebcam()
-  {
+  function displayWebcam() {
     setShowWebcam(true);
     document.getElementById("cameraConnect").style.display = "none";
   }
@@ -89,23 +88,33 @@ const Conditions = () => {
                     </Typography>
                     <div id="cameraConnect">
                       <Button
-                          id="connect-button"
-                          variant="contained"
-                          color="primary"
-                          component="span"
-                          startIcon={<CameraAltIcon />}
-                          onClick={displayWebcam}
-                          style={{ marginTop: "100px" }}
-                        >
-                          Connect
-                        </Button>
+                        id="connect-button"
+                        variant="contained"
+                        color="primary"
+                        component="span"
+                        startIcon={<CameraAltIcon />}
+                        onClick={displayWebcam}
+                        style={{ marginTop: "100px" }}
+                      >
+                        Connect
+                      </Button>
                     </div>
-                    {showWebcam &&
-                      <Webcam id="webcamVideo" src="" audio={false} mirrored={true} />
-                    }
+                    {showWebcam && (
+                      <Webcam
+                        id="webcamVideo"
+                        src=""
+                        audio={false}
+                        mirrored={true}
+                      />
+                    )}
                   </Container>
                 </Grid>
-                <Grid item direction="column" justifyContent="center" id="dividerGrid">
+                <Grid
+                  item
+                  direction="column"
+                  justifyContent="center"
+                  id="dividerGrid"
+                >
                   <Container>
                     <div id="divider" />
                   </Container>
@@ -123,7 +132,11 @@ const Conditions = () => {
                         className={"preview"}
                         id="videoPreview"
                         controls
-                        style={{ display: "none", maxWidth: "400px", maxHeight: "300px" }}
+                        style={{
+                          display: "none",
+                          maxWidth: "400px",
+                          maxHeight: "300px",
+                        }}
                       >
                         <source id="video-source" src="splashVideo" />
                         Your browser does not support HTML5 video.
@@ -132,7 +145,11 @@ const Conditions = () => {
                         src="splashImage"
                         id="imagePreview"
                         className={"preview"}
-                        style={{ display: "none", maxWidth: "400px", maxHeight: "300px" }}
+                        style={{
+                          display: "none",
+                          maxWidth: "400px",
+                          maxHeight: "300px",
+                        }}
                       />
                     </div>
                     <div id="center">
