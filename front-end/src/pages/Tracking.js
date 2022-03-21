@@ -29,8 +29,8 @@ const load_model = async () => {
   //const model = await loadGraphModel(
   //"https://raw.githubusercontent.com/hugozanini/TFJS-object-detection/master/models/kangaroo-detector/model.json"
   //);
-  
-  console.log("model loaded")
+
+  console.log("model loaded");
   return model;
 };
 
@@ -118,7 +118,7 @@ class Tracking extends React.Component {
     console.log("Showing webcam");
     document.getElementById("cameraConnect").style.display = "none";
     this.runModelDetections();
-  }
+  };
 
   runModelDetections = () => {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -130,7 +130,7 @@ class Tracking extends React.Component {
           },
         })
         .then((stream) => {
-          console.log("Got camera stream")
+          console.log("Got camera stream");
           window.stream = stream;
           this.videoRef.current.srcObject = stream;
           return new Promise((resolve, reject) => {
@@ -142,7 +142,7 @@ class Tracking extends React.Component {
 
       const modelPromise = load_model();
 
-      console.log("Awaiting webcam and model...")
+      console.log("Awaiting webcam and model...");
       Promise.all([modelPromise, webCamPromise])
         .then((values) => {
           console.log("Model and webcam loaded");
@@ -153,19 +153,18 @@ class Tracking extends React.Component {
           console.error(error);
         });
     }
-  }
+  };
 
   setCanvasPosition = () => {
-    console.log("Setting canvas position")
+    console.log("Setting canvas position");
     let rect = this.videoRef.current.getBoundingClientRect();
-    console.log(rect)
+    console.log(rect);
     let ref = this.canvasRef.current;
-
 
     ref.width = rect.width;
     ref.height = rect.height;
     ref.className = "canvas";
-  }
+  };
 
   detectFrame = (video, model) => {
     tf.engine().startScope();
@@ -316,10 +315,7 @@ class Tracking extends React.Component {
                             muted
                             ref={this.videoRef}
                           />
-                          <canvas
-                            classname="canvas"
-                            ref={this.canvasRef}
-                          />
+                          <canvas classname="canvas" ref={this.canvasRef} />
                         </div>
                       )}
                     </Container>
@@ -404,7 +400,7 @@ class Tracking extends React.Component {
         </main>
       </div>
     );
-  }
+  };
 }
 
 export default Tracking;
