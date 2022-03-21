@@ -42,6 +42,34 @@
   margin-top: 70px;
 }
 
+.trackerContainer {
+  position: relative;
+  margin: 0 auto;
+}
+
+.trackerVideo {
+  top: 0;
+  left: 0;
+}
+
+.canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/*#trackCanvas {         */
+/*  position: "absolute";*/
+/*  marginleft: "auto";  */
+/*  marginright: "auto"; */
+/*  left: 0;             */
+/*  right: 0;            */
+/*  textalign: "center"; */
+/*  zindex: 8;           */
+/*  width: 640;          */
+/*  height: 480;         */
+/*}                      */
+
 #cameraConnect {
   width: 400px;
   height: 300px;
