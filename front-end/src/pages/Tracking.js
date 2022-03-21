@@ -44,6 +44,8 @@ const threshold = 0.5;
 //id: 2,
 //},
 //};
+import {useState} from "react";
+import CameraAltIcon from '@mui/icons-material/CameraAlt';
 
 // TODO: validate labels for 4 class model
 let classesDir = {
@@ -67,6 +69,7 @@ let classesDir = {
 
 //Called when file is uploaded
 function upload(event) {
+  const [showWebcam, setShowWebcam] = useState(false);
   //Compatible file types
   const imageTypes = ["png", "jpg", "jpeg"];
   const videoTypes = ["mp4", "mkv", "wmv", "mov"];
@@ -111,6 +114,12 @@ function upload(event) {
     reader.readAsDataURL(event.target.files[0]);
   }
 }
+
+  function displayWebcam()
+  {
+    setShowWebcam(true);
+    document.getElementById("cameraConnect").style.display = "none";
+  }
 
 const drawRect = (detections, ctx) => {
   // Loop through each prediction
@@ -350,23 +359,43 @@ class Tracking extends React.Component {
                           height="500"
                         />
                       </div>
+                    <div id="cameraConnect">
+                      <Button
+                          id="connect-button"
+                          variant="contained"
+                          color="primary"
+                          component="span"
+                          startIcon={<CameraAltIcon />}
+                          onClick={displayWebcam}
+                          style={{ marginTop: "100px" }}
+                        >
+                          Connect
+                        </Button>
+                    </div>
+                    {showWebcam &&
+                      <Webcam id="webcamVideo" src="" audio={false} mirrored={true} />
+                    }
                     </Container>
                   </Grid>
-                  <Grid item direction="column" justifyContent="center">
+                <Grid item direction="column" justifyContent="center" id="dividerGrid">
                     <Container>
                       <div id="divider" />
                     </Container>
                   </Grid>
                   <Grid item direction="column" justifyContent="center">
+                  <Container>
+                    <div id="dividerHorizontal" />
+                  </Container>
                     <Typography id="label-header" variant="h4">
                       Upload Image or Video
                     </Typography>
                     <Container id="uploadContainer">
+                    <div id="previewDiv">
                       <video
                         className={"preview"}
                         id="videoPreview"
                         controls
-                        style={{ display: "none" }}
+                        style={{ display: "none", maxWidth: "400px", maxHeight: "300px" }}
                       >
                         <source id="video-source" src="splashVideo" />
                         Your browser does not support HTML5 video.
@@ -375,8 +404,9 @@ class Tracking extends React.Component {
                         src="splashImage"
                         id="imagePreview"
                         className={"preview"}
-                        style={{ display: "none" }}
+                        style={{ display: "none", maxWidth: "400px", maxHeight: "300px" }}
                       />
+                    </div>
                       <div id="center">
                         <label htmlFor="file-upload">
                           <Input
