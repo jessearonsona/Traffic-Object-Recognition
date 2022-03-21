@@ -5,14 +5,14 @@
 //       4) Auto-quit when time to run model has elapsed or when recorded video is complete
 //       5) Components to show results for recorded video or still image with option to send to DB?
 
-import React, { useState } from "react";
+import React from "react";
 import { Button, Container, Grid, Input, Typography } from "@material-ui/core";
-import Webcam from "react-webcam";
 import { loadGraphModel } from "@tensorflow/tfjs-converter";
 
 import AddIcon from "@mui/icons-material/Add";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import * as tf from "@tensorflow/tfjs";
+import { VideoCorrelationTracker } from "dlib-correlation-tracker-js";
 
 import "../styling/TrackingAndConditions.css";
 import Header from "../components/Header";
@@ -30,11 +30,11 @@ const load_model = async () => {
   //"https://raw.githubusercontent.com/hugozanini/TFJS-object-detection/master/models/kangaroo-detector/model.json"
   //);
 
-  console.log("model loaded");
   return model;
 };
 
 const threshold = 0.5;
+const framesToTrack = 20;
 
 // TODO: validate labels for 4 class model
 let classesDir = {
@@ -67,6 +67,10 @@ class Tracking extends React.Component {
 
     this.state = {
       showWebcam: false,
+      upCount: 0,
+      sideCount: 0,
+      frame: 0,
+      trackers: [],
     };
   }
 
@@ -115,12 +119,12 @@ class Tracking extends React.Component {
 
   displayWebcam = () => {
     this.setState({ showWebcam: true });
-    console.log("Showing webcam");
     document.getElementById("cameraConnect").style.display = "none";
     this.runModelDetections();
   };
 
   runModelDetections = () => {
+    console.log("Initiating Tracking Loop");
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       const webCamPromise = navigator.mediaDevices
         .getUserMedia({
@@ -130,7 +134,6 @@ class Tracking extends React.Component {
           },
         })
         .then((stream) => {
-          console.log("Got camera stream");
           window.stream = stream;
           this.videoRef.current.srcObject = stream;
           return new Promise((resolve, reject) => {
@@ -156,9 +159,7 @@ class Tracking extends React.Component {
   };
 
   setCanvasPosition = () => {
-    console.log("Setting canvas position");
     let rect = this.videoRef.current.getBoundingClientRect();
-    console.log(rect);
     let ref = this.canvasRef.current;
 
     ref.width = rect.width;
@@ -166,15 +167,76 @@ class Tracking extends React.Component {
     ref.className = "canvas";
   };
 
+  buildTrackersFromDetections = (detections) => {
+    let trackers = [];
+    detections.forEach((obj) => {
+      trackers.push({
+        tracker: VideoCorrelationTracker(this.videoRef, {
+          x: obj.bbox[0],
+          y: obj.bbox[1],
+          width: obj.bbox[2],
+          height: obj.bbox[3],
+        }),
+        label: obj.class,
+      });
+    });
+    return trackers;
+  };
+
+  updateTrackers = () => {
+    let trackers = [];
+    self.state.trackers.forEach((tracker) => {
+      // get prediction and update tracker
+      const { x, y, width, height } = tracker.tracker.predict;
+
+      // render predictions
+      this.renderBox({ x, y, width, height }, tracker.class);
+
+      // if prediciton is Out of bounds remove it
+
+      // if prediction cross ROI update ROI count
+    });
+
+    // set updated trackers
+    self.setState({ trackers: trackers });
+  };
+
+  renderTrackers = (trackers) => {
+    // TODO Render trackers
+  };
+
   detectFrame = (video, model) => {
-    tf.engine().startScope();
-    model.executeAsync(this.process_input(video)).then((predictions) => {
-      this.renderPredictions(predictions, video);
-      requestAnimationFrame(() => {
-        this.detectFrame(video, model);
+    requestAnimationFrame(() => {
+      this.detectFrame(video, model);
+    });
+
+    // MAX FRAMES
+    if (this.state.frame == 500) {
+      requestAnimationFrame(() => {});
+      return;
+    }
+
+    this.setState({ frame: (this.state.frame + 1) % framesToTrack });
+
+    if (this.state.frame % framesToTrack == 0) {
+      console.log("Detecting Frame");
+      // Run Detection
+
+      tf.engine().startScope();
+      model.executeAsync(this.process_input(video)).then((predictions) => {
+        let detections = this.getDetectionsFromPredictions(predictions);
+        this.renderDetections(detections);
+
+        let new_trackers = this.buildTrackersFromDetections(detections);
+        this.setState({ trackers: this.trackers.concat(new_trackers) });
       });
       tf.engine().endScope();
-    });
+    } else {
+      // Perform Tracking
+      console.log("Tracking Frame");
+    }
+
+    this.renderTrackers(this.state.trackers);
   };
 
   process_input(video_frame) {
@@ -198,6 +260,7 @@ class Tracking extends React.Component {
         bbox[1] = minY;
         bbox[2] = maxX - minX;
         bbox[3] = maxY - minY;
+        console.log(bbox);
         detectionObjects.push({
           class: classes[i],
           label: classesDir[classes[i]].name,
@@ -209,17 +272,7 @@ class Tracking extends React.Component {
     return detectionObjects;
   }
 
-  renderPredictions = (predictions) => {
-    const ctx = this.canvasRef.current.getContext("2d");
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
-    // Font options.
-    const font = "16px sans-serif";
-    ctx.font = font;
-    ctx.textBaseline = "top";
-
-    //Getting predictions
-
+  getDetectionsFromPredictions = (predictions) => {
     // Car Model 4 classes
     const boxes = predictions[2].arraySync();
     // [4] could be scores [[float; 5]; 100]. [7] could be scores [float; 100]
@@ -234,6 +287,18 @@ class Tracking extends React.Component {
       classes,
       classesDir
     );
+
+    return detections;
+  };
+
+  renderDetections = (detections) => {
+    const ctx = this.canvasRef.current.getContext("2d");
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+    // Font options.
+    const font = "16px sans-serif";
+    ctx.font = font;
+    ctx.textBaseline = "top";
 
     detections.forEach((item) => {
       const x = item["bbox"][0];
