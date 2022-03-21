@@ -71,7 +71,7 @@ class Tracking extends React.Component {
   }
 
   //Called when file is uploaded
-  upload(event) {
+  upload = (event) => {
     var videoSrc = document.getElementById("video-source");
     var videoTag = document.getElementById("videoPreview");
     var imgTag = document.getElementById("imagePreview");
