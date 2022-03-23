@@ -64,13 +64,13 @@ class Tracking extends React.Component {
 
     this.imageTypes = ["jpg", "jpeg", "png"];
     this.videoTypes = ["mp4", "mkv", "wmv", "mov"];
+    this.trackers = [];
+    this.frame = 0;
+    this.upCount = 0;
+    this.sideCount = 0;
 
     this.state = {
       showWebcam: false,
-      upCount: 0,
-      sideCount: 0,
-      frame: 0,
-      trackers: [],
     };
   }
 
@@ -115,7 +115,7 @@ class Tracking extends React.Component {
 
       reader.readAsDataURL(event.target.files[0]);
     }
-  }
+  };
 
   displayWebcam = () => {
     this.setState({ showWebcam: true });
@@ -145,6 +145,7 @@ class Tracking extends React.Component {
 
       const modelPromise = load_model();
 
+      //TODO: Set Canvas Position Before Model is loading, so that failure to load the model doesn't break the Look
       console.log("Awaiting webcam and model...");
       Promise.all([modelPromise, webCamPromise])
         .then((values) => {
@@ -167,25 +168,11 @@ class Tracking extends React.Component {
     ref.className = "canvas";
   };
 
-  buildTrackersFromDetections = (detections) => {
-    let trackers = [];
-    detections.forEach((obj) => {
-      trackers.push({
-        tracker: VideoCorrelationTracker(this.videoRef, {
-          x: obj.bbox[0],
-          y: obj.bbox[1],
-          width: obj.bbox[2],
-          height: obj.bbox[3],
-        }),
-        label: obj.class,
-      });
-    });
-    return trackers;
-  };
+  buildTrackersFromDetections = (detections) => {};
 
   updateTrackers = () => {
     let trackers = [];
-    self.state.trackers.forEach((tracker) => {
+    this.state.trackers.forEach((tracker) => {
       // get prediction and update tracker
       const { x, y, width, height } = tracker.tracker.predict;
 
@@ -198,45 +185,60 @@ class Tracking extends React.Component {
     });
 
     // set updated trackers
-    self.setState({ trackers: trackers });
+    this.setState({ trackers: trackers });
   };
 
   renderTrackers = (trackers) => {
     // TODO Render trackers
   };
 
-  detectFrame = (video, model) => {
-    requestAnimationFrame(() => {
-      this.detectFrame(video, model);
-    });
+  detectFrame = async (video, model) => {
+    while (true) {
+      this.frame = (this.frame + 1) % framesToTrack;
 
-    // MAX FRAMES
-    if (this.state.frame == 500) {
-      requestAnimationFrame(() => {});
-      return;
-    }
+      if (this.frame === 0) {
+        // Run Detection
 
-    this.setState({ frame: (this.state.frame + 1) % framesToTrack });
-
-    if (this.state.frame % framesToTrack == 0) {
-      console.log("Detecting Frame");
-      // Run Detection
-
-      tf.engine().startScope();
-      model.executeAsync(this.process_input(video)).then((predictions) => {
+        tf.engine().startScope();
+        let predictions = await model.executeAsync(this.process_input(video));
         let detections = this.getDetectionsFromPredictions(predictions);
-        this.renderDetections(detections);
 
-        let new_trackers = this.buildTrackersFromDetections(detections);
-        this.setState({ trackers: this.trackers.concat(new_trackers) });
-      });
-      tf.engine().endScope();
-    } else {
-      // Perform Tracking
-      console.log("Tracking Frame");
+        if (detections.length > 0) {
+          console.log("detections");
+          console.log(detections);
+
+          // create a tracker for each detected object and save them in the trackers list
+          detections.forEach((obj) => {
+            let new_tracker = new VideoCorrelationTracker(
+              document.getElementById('webcamVideo'),
+              {
+                x: obj.bbox[0],
+                y: obj.bbox[1],
+                width: obj.bbox[2] - obj.bbox[0], // x2 - 1 == width,
+                height: obj.bbox[3] - obj.bbox[1], // y2 - y1 == height,
+              }
+            );
+
+            this.trackers.push({
+              tracker: new_tracker,
+              label: obj.class,
+            });
+
+            console.log("trackers");
+            console.log(this.trackers);
+          });
+        }
+        tf.engine().endScope();
+      } else {
+        // Perform Tracking
+        if (this.trackers.length > 0) {
+          console.log("trackers");
+          console.log(this.trackers);
+        }
+      }
+
+      this.renderTrackers(this.trackers);
     }
-
-    this.renderTrackers(this.state.trackers);
   };
 
   process_input(video_frame) {
@@ -260,7 +262,6 @@ class Tracking extends React.Component {
         bbox[1] = minY;
         bbox[2] = maxX - minX;
         bbox[3] = maxY - minY;
-        console.log(bbox);
         detectionObjects.push({
           class: classes[i],
           label: classesDir[classes[i]].name,
@@ -376,11 +377,11 @@ class Tracking extends React.Component {
                             id="webcamVideo"
                             className="trackerVideo"
                             autoPlay
-                            playsInLine
+                            playsInline
                             muted
                             ref={this.videoRef}
                           />
-                          <canvas classname="canvas" ref={this.canvasRef} />
+                          <canvas className="canvas" ref={this.canvasRef} />
                         </div>
                       )}
                     </Container>
