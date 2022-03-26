@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import Tracking from "./pages/Tracking";
 import Conditions from "./pages/Conditions";
 import Home from "./pages/Home";
+import Admin from "./pages/Admin";
 
 const theme = createTheme({
   palette: {
@@ -25,6 +26,7 @@ function App() {
           <Route path="/tracking" element={<Tracking />} />
           <Route path="/conditions" element={<Conditions />} />
           <Route path="/home" element={<Home />} />
+          <Route path="/admin" element={<Admin />} />
         </Routes>
       </Router>
     </ThemeProvider>
