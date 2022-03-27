@@ -1,0 +1,53 @@
+.mainContent {
+  margin-top: 70px;
+}
+
+.row:hover {
+  background-color: #e9e9e9 !important;
+}
+
+.row:nth-of-type(even){
+  background-color: #f1f1f1;
+}
+
+.table {
+  width: 90%;
+  margin-bottom: 50px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  max-width: 700px;
+}
+
+#add-user-mobile {
+  position: fixed;
+  right: 5px;
+  bottom: 5px;
+  display: none;
+}
+
+#add-user {
+  position: absolute;
+  right: 5px;
+  margin-bottom: 15px;
+}
+
+@media only screen and (max-width: 600px) {
+  .table {
+    width: 100%;
+  }
+
+  #add-user {
+    display: none;
+  }
+
+  #add-user-mobile {
+    display: block;
+  }
+}
+
+@media only screen and (max-width: 700px) {
+  .table {
+    width: 100%;
+  }
+}
