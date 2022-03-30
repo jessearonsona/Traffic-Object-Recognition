@@ -1,5 +1,6 @@
 #webcamVideo {
-  height: 300px;
+  max-height: 300px;
+  max-width: 400px;
 }
 
 #label-header {
@@ -15,6 +16,7 @@
 
 #uploadContainer {
   height: 303px;
+  width: 450px;
   align-items: center;
   justify-content: center;
   display: inline-block;
@@ -40,26 +42,56 @@
   margin-top: 70px;
 }
 
-#trackCam {
-  position: "absolute";
-  marginleft: "auto";
-  marginright: "auto";
-  left: 0;
-  right: 0;
-  textalign: "center";
-  zindex: 9;
-  width: 640;
-  height: 480;
+.trackerContainer {
+  position: relative;
+  margin: 0 auto;
 }
 
-#trackCanvas {
-  position: "absolute";
-  marginleft: "auto";
-  marginright: "auto";
+.trackerVideo {
+  top: 0;
   left: 0;
-  right: 0;
-  textalign: "center";
-  zindex: 8;
-  width: 640;
-  height: 480;
+}
+
+.canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/*#trackCanvas {         */
+/*  position: "absolute";*/
+/*  marginleft: "auto";  */
+/*  marginright: "auto"; */
+/*  left: 0;             */
+/*  right: 0;            */
+/*  textalign: "center"; */
+/*  zindex: 8;           */
+/*  width: 640;          */
+/*  height: 480;         */
+/*}                      */
+
+#cameraConnect {
+  width: 400px;
+  height: 300px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+@media only screen and (max-width: 940px) {
+  #divider {
+    display: none;
+  }
+
+  #dividerGrid {
+    height: 0px;
+    display: none;
+  }
+
+  #dividerHorizontal {
+    width: 400px;
+    height: 2px;
+    background-color: dimgray;
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
 }

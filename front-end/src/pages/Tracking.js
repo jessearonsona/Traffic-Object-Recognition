@@ -5,13 +5,13 @@
 //       4) Auto-quit when time to run model has elapsed or when recorded video is complete
 //       5) Components to show results for recorded video or still image with option to send to DB?
 
-import React, { useRef, useState, useEffect } from "react";
-import ReactDOM from "react-dom";
+import React, { useState } from "react";
 import { Button, Container, Grid, Input, Typography } from "@material-ui/core";
+import Webcam from "react-webcam";
 import { loadGraphModel } from "@tensorflow/tfjs-converter";
 
-import Webcam from "react-webcam";
 import AddIcon from "@mui/icons-material/Add";
+import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import * as tf from "@tensorflow/tfjs";
 
 import "../styling/TrackingAndConditions.css";
@@ -22,237 +22,385 @@ import OptionPane from "../components/OptionPane";
 
 tf.setBackend("webgl");
 
-async function load_model() {
+const load_model = async () => {
   // It's possible to load the model locally or from a repo
   // You can choose whatever IP and PORT you want in the "http://127.0.0.1:8080/model.json" just set it before in your https server
   const model = await loadGraphModel("http://127.0.0.1:8080/model.json");
-  //const model = await loadGraphModel("https://raw.githubusercontent.com/hugozanini/TFJS-object-detection/master/models/kangaroo-detector/model.json");
+  //const model = await loadGraphModel(
+  //"https://raw.githubusercontent.com/hugozanini/TFJS-object-detection/master/models/kangaroo-detector/model.json"
+  //);
+
+  console.log("model loaded");
   return model;
-}
+};
 
-const threshold = 0.25;
+const threshold = 0.5;
 
+// TODO: validate labels for 4 class model
 let classesDir = {
   1: {
-    name: "Kangaroo",
+    name: "Passenger",
     id: 1,
   },
   2: {
-    name: "Other",
+    name: "Bus",
     id: 2,
+  },
+  3: {
+    name: "Single Unit Truck",
+    id: 3,
+  },
+  4: {
+    name: "Multi Unit Truck",
+    id: 4,
   },
 };
 
-//Called when file is uploaded
-function upload(event) {
-  //Compatible file types
-  const imageTypes = ["png", "jpg", "jpeg"];
-  const videoTypes = ["mp4", "mkv", "wmv", "mov"];
+class Tracking extends React.Component {
+  constructor(props) {
+    super(props);
+    this.videoRef = React.createRef();
+    this.canvasRef = React.createRef();
 
-  var videoSrc = document.getElementById("video-source");
-  var videoTag = document.getElementById("videoPreview");
-  var imgTag = document.getElementById("imagePreview");
+    this.imageTypes = ["jpg", "jpeg", "png"];
+    this.videoTypes = ["mp4", "mkv", "wmv", "mov"];
 
-  //Checks if a file is uploaded
-  if (event.target.files && event.target.files[0]) {
-    var extension = event.target.files[0].name.split(".").pop().toLowerCase();
-    var reader = new FileReader();
-
-    //If file is image
-    if (imageTypes.includes(extension)) {
-      reader.onload = function (e) {
-        imgTag.src = e.target.result;
-      }.bind(this);
-      imgTag.style.display = "block";
-      videoTag.style.display = "none";
-      document.getElementById("upload-button").style.marginTop = "5px";
-    }
-
-    //If file is video
-    else if (videoTypes.includes(extension)) {
-      reader.onload = function (e) {
-        videoSrc.src = e.target.result;
-        videoTag.load();
-      }.bind(this);
-      videoTag.style.display = "block";
-      imgTag.style.display = "none";
-      document.getElementById("upload-button").style.marginTop = "5px";
-    }
-
-    //Incompatible type
-    else {
-      var error = "Incompatible file type.\nCompatible file types:\n";
-      error += imageTypes.join(", ") + ", " + videoTypes.join(", ");
-      alert(error);
-    }
-
-    reader.readAsDataURL(event.target.files[0]);
+    this.state = {
+      showWebcam: false,
+    };
   }
-}
 
-const drawRect = (detections, ctx) => {
-  // Loop through each prediction
-  detections.forEach((prediction) => {
-    // Extract boxes and classes
-    const [x, y, width, height] = prediction["bbox"];
-    const text = prediction["class"];
+  //Called when file is uploaded
+  upload = (event) => {
+    var videoSrc = document.getElementById("video-source");
+    var videoTag = document.getElementById("videoPreview");
+    var imgTag = document.getElementById("imagePreview");
 
-    // Set styling
-    const color = Math.floor(Math.random() * 16777215).toString(16);
-    ctx.strokeStyle = "#" + color;
-    ctx.font = "18px Arial";
+    //Checks if a file is uploaded
+    if (event.target.files && event.target.files[0]) {
+      var extension = event.target.files[0].name.split(".").pop().toLowerCase();
+      var reader = new FileReader();
 
-    // Draw rectangles and text
-    ctx.beginPath();
-    ctx.fillStyle = "#" + color;
-    ctx.fillText(text, x, y);
-    ctx.rect(x, y, width, height);
-    ctx.stroke();
-  });
-};
+      //If file is image
+      if (this.imageTypes.includes(extension)) {
+        reader.onload = function (e) {
+          imgTag.src = e.target.result;
+        }.bind(this);
+        imgTag.style.display = "block";
+        videoTag.style.display = "none";
+        document.getElementById("upload-button").style.marginTop = "5px";
+      }
 
-function Tracking() {
-  const webcamRef = useRef(null);
-  const canvasRef = useRef(null);
+      //If file is video
+      else if (this.videoTypes.includes(extension)) {
+        reader.onload = function (e) {
+          videoSrc.src = e.target.result;
+          videoTag.load();
+        }.bind(this);
+        videoTag.style.display = "block";
+        imgTag.style.display = "none";
+        document.getElementById("upload-button").style.marginTop = "5px";
+      }
 
-  // main loop
-  const runModel = async () => {
-    const model = await load_model();
-    console.log("Model Loaded");
+      //Incompatible type
+      else {
+        var error = "Incompatible file type.\nCompatible file types:\n";
+        error += this.imageTypes.join(", ") + ", " + this.videoTypes.join(", ");
+        alert(error);
+      }
 
-    // Loop and detect
-    setInterval(() => {
-      detect(model);
-    }, 10);
+      reader.readAsDataURL(event.target.files[0]);
+    }
+  }
+
+  displayWebcam = () => {
+    this.setState({ showWebcam: true });
+    console.log("Showing webcam");
+    document.getElementById("cameraConnect").style.display = "none";
+    this.runModelDetections();
   };
 
-  const process_input = video_frame => {
-    const tfimg = tf.browser.fromPixels(video_frame).toInt();
-    const expandedimg = tfimg.transpose([0,1,2]).expandDims();
-    return expandedimg;
-  };
+  runModelDetections = () => {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      const webCamPromise = navigator.mediaDevices
+        .getUserMedia({
+          audio: false,
+          video: {
+            facingMode: "user",
+          },
+        })
+        .then((stream) => {
+          console.log("Got camera stream");
+          window.stream = stream;
+          this.videoRef.current.srcObject = stream;
+          return new Promise((resolve, reject) => {
+            this.videoRef.current.onloadedmetadata = () => {
+              resolve();
+            };
+          });
+        });
 
-  const detect = async (model) => {
-    // Check data is available
-    if (
-      typeof webcamRef.current !== "undefined" &&
-      webcamRef.current !== null &&
-      webcamRef.current.video.readyState === 4
-    ) {
-      // Get Video Properties
-      const video = webcamRef.current.video;
-      const videoWidth = webcamRef.current.video.videoWidth;
-      const videoHeight = webcamRef.current.video.videoHeight;
+      const modelPromise = load_model();
 
-      // Set video width
-      webcamRef.current.video.width = videoWidth;
-      webcamRef.current.video.height = videoHeight;
-
-      // Set canvas height and width
-      canvasRef.current.width = videoWidth;
-      canvasRef.current.height = videoHeight;
-
-      // Make Detections
-      const obj = await model.predict(webcamRef.current.stream);
-
-      // Draw mesh
-      const ctx = canvasRef.current.getContext("2d");
-      drawRect(obj, ctx);
+      console.log("Awaiting webcam and model...");
+      Promise.all([modelPromise, webCamPromise])
+        .then((values) => {
+          console.log("Model and webcam loaded");
+          this.setCanvasPosition();
+          this.detectFrame(this.videoRef.current, values[0]);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     }
   };
 
-  useEffect(() => {
-    runModel();
-  }, []);
+  setCanvasPosition = () => {
+    console.log("Setting canvas position");
+    let rect = this.videoRef.current.getBoundingClientRect();
+    console.log(rect);
+    let ref = this.canvasRef.current;
 
-  return (
-    <div className="container">
-      <Header />
-      <main id="mainContent">
-        <Grid container>
-          <Grid item xs={0} lg={1}>
-            {/* spacer */}
-          </Grid>
-          <Grid item xs={12} lg={10}>
-            <Subheader />
-            <div className="center">
-              <Grid
-                container
-                direction="row"
-                justifyContent="center"
-                alignItems="center"
-              >
-                <Grid item direction="column" justifyContent="center">
-                  <Container>
-                    <Typography id="label-header" variant="h4">
-                      Live Camera
-                    </Typography>
-                    <Webcam ref={webcamRef} muted={true} id="trackCam" />
-                    <canvas ref={canvasRef} id="trackCanvas" />
-                  </Container>
-                </Grid>
-                <Grid item direction="column" justifyContent="center">
-                  <Container>
-                    <div id="divider" />
-                  </Container>
-                </Grid>
-                <Grid item direction="column" justifyContent="center">
-                  <Typography id="label-header" variant="h4">
-                    Upload Image or Video
-                  </Typography>
-                  <Container id="uploadContainer">
-                    <video
-                      className={"preview"}
-                      id="videoPreview"
-                      controls
-                      style={{ display: "none" }}
-                    >
-                      <source id="video-source" src="splashVideo" />
-                      Your browser does not support HTML5 video.
-                    </video>
-                    <img
-                      src="splashImage"
-                      id="imagePreview"
-                      className={"preview"}
-                      style={{ display: "none" }}
-                    />
-                    <div id="center">
-                      <label htmlFor="file-upload">
-                        <Input
-                          accept="Video/*,Image/*"
-                          id="file-upload"
-                          onChange={upload}
-                          multiple
-                          type="file"
-                          value={""}
-                          style={{ display: "none" }}
-                        />
+    ref.width = rect.width;
+    ref.height = rect.height;
+    ref.className = "canvas";
+  };
+
+  detectFrame = (video, model) => {
+    tf.engine().startScope();
+    model.executeAsync(this.process_input(video)).then((predictions) => {
+      this.renderPredictions(predictions, video);
+      requestAnimationFrame(() => {
+        this.detectFrame(video, model);
+      });
+      tf.engine().endScope();
+    });
+  };
+
+  process_input(video_frame) {
+    const tfimg = tf.browser.fromPixels(video_frame).toInt();
+    const expandedimg = tfimg.transpose([0, 1, 2]).expandDims();
+    return expandedimg;
+  }
+
+  buildDetectedObjects(scores, threshold, boxes, classes, classesDir) {
+    const detectionObjects = [];
+    var video_frame = document.getElementById("webcamVideo");
+
+    scores[0].forEach((score, i) => {
+      if (score > threshold) {
+        const bbox = [];
+        const minY = boxes[0][i][0] * video_frame.offsetHeight;
+        const minX = boxes[0][i][1] * video_frame.offsetWidth;
+        const maxY = boxes[0][i][2] * video_frame.offsetHeight;
+        const maxX = boxes[0][i][3] * video_frame.offsetWidth;
+        bbox[0] = minX;
+        bbox[1] = minY;
+        bbox[2] = maxX - minX;
+        bbox[3] = maxY - minY;
+        detectionObjects.push({
+          class: classes[i],
+          label: classesDir[classes[i]].name,
+          score: score.toFixed(4),
+          bbox: bbox,
+        });
+      }
+    });
+    return detectionObjects;
+  }
+
+  renderPredictions = (predictions) => {
+    const ctx = this.canvasRef.current.getContext("2d");
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+    // Font options.
+    const font = "16px sans-serif";
+    ctx.font = font;
+    ctx.textBaseline = "top";
+
+    //Getting predictions
+
+    // Car Model 4 classes
+    const boxes = predictions[2].arraySync();
+    // [4] could be scores [[float; 5]; 100]. [7] could be scores [float; 100]
+    const scores = predictions[7].arraySync();
+    // [5] is def classes
+    const classes = predictions[5].dataSync();
+
+    const detections = this.buildDetectedObjects(
+      scores,
+      threshold,
+      boxes,
+      classes,
+      classesDir
+    );
+
+    detections.forEach((item) => {
+      const x = item["bbox"][0];
+      const y = item["bbox"][1];
+      const width = item["bbox"][2];
+      const height = item["bbox"][3];
+
+      // Draw the bounding box.
+      ctx.strokeStyle = "#00FFFF";
+      ctx.lineWidth = 4;
+      ctx.strokeRect(x, y, width, height);
+
+      // Draw the label background.
+      ctx.fillStyle = "#00FFFF";
+      const textWidth = ctx.measureText(
+        item["label"] + " " + (100 * item["score"]).toFixed(2) + "%"
+      ).width;
+      const textHeight = parseInt(font, 10); // base 10
+      ctx.fillRect(x, y, textWidth + 4, textHeight + 4);
+    });
+
+    detections.forEach((item) => {
+      const x = item["bbox"][0];
+      const y = item["bbox"][1];
+
+      // Draw the text last to ensure it's on top.
+      ctx.fillStyle = "#000000";
+      ctx.fillText(
+        item["label"] + " " + (100 * item["score"]).toFixed(2) + "%",
+        x,
+        y
+      );
+    });
+  };
+
+  render = () => {
+    return (
+      <div className="container">
+        <Header />
+        <main id="mainContent">
+          <Grid container>
+            <Grid item xs={0} lg={1}>
+              {/* spacer */}
+            </Grid>
+            <Grid item xs={12} lg={10}>
+              <Subheader />
+              <div className="center">
+                <Grid
+                  container
+                  direction="row"
+                  justifyContent="center"
+                  alignItems="center"
+                >
+                  <Grid item direction="column" justifyContent="center">
+                    <Container>
+                      <Typography id="label-header" variant="h4">
+                        Live Camera
+                      </Typography>
+                      <div id="cameraConnect">
                         <Button
-                          id="upload-button"
+                          id="connect-button"
                           variant="contained"
                           color="primary"
                           component="span"
-                          startIcon={<AddIcon />}
-                          style={{ margin: "5px", marginTop: "100px" }}
+                          startIcon={<CameraAltIcon />}
+                          onClick={this.displayWebcam}
+                          style={{ marginTop: "100px" }}
                         >
-                          Upload
+                          Connect
                         </Button>
-                      </label>
-                    </div>
-                  </Container>
+                      </div>
+                      {this.state.showWebcam && (
+                        <div className="trackerContainer">
+                          <video
+                            id="webcamVideo"
+                            className="trackerVideo"
+                            autoPlay
+                            playsInLine
+                            muted
+                            ref={this.videoRef}
+                          />
+                          <canvas classname="canvas" ref={this.canvasRef} />
+                        </div>
+                      )}
+                    </Container>
+                  </Grid>
+                  <Grid
+                    item
+                    direction="column"
+                    justifyContent="center"
+                    id="dividerGrid"
+                  >
+                    <Container>
+                      <div id="divider" />
+                    </Container>
+                  </Grid>
+                  <Grid item direction="column" justifyContent="center">
+                    <Container>
+                      <div id="dividerHorizontal" />
+                    </Container>
+                    <Typography id="label-header" variant="h4">
+                      Upload Image or Video
+                    </Typography>
+                    <Container id="uploadContainer">
+                      <div id="previewDiv">
+                        <video
+                          className={"preview"}
+                          id="videoPreview"
+                          controls
+                          style={{
+                            display: "none",
+                            maxWidth: "400px",
+                            maxHeight: "300px",
+                          }}
+                        >
+                          <source id="video-source" src="splashVideo" />
+                          Your browser does not support HTML5 video.
+                        </video>
+                        <img
+                          src="splashImage"
+                          id="imagePreview"
+                          className={"preview"}
+                          style={{
+                            display: "none",
+                            maxWidth: "400px",
+                            maxHeight: "300px",
+                          }}
+                        />
+                      </div>
+                      <div id="center">
+                        <label htmlFor="file-upload">
+                          <Input
+                            accept="Video/*,Image/*"
+                            id="file-upload"
+                            onChange={this.upload}
+                            multiple
+                            type="file"
+                            value={""}
+                            style={{ display: "none" }}
+                          />
+                          <Button
+                            id="upload-button"
+                            variant="contained"
+                            color="primary"
+                            component="span"
+                            startIcon={<AddIcon />}
+                            style={{ margin: "5px", marginTop: "100px" }}
+                          >
+                            Upload
+                          </Button>
+                        </label>
+                      </div>
+                    </Container>
+                  </Grid>
                 </Grid>
-              </Grid>
-            </div>
-            <OptionPane />
-            <ButtonGroup />
+              </div>
+              <OptionPane />
+              <ButtonGroup />
+            </Grid>
+            <Grid item xs={0} lg={1}>
+              {/* spacer */}
+            </Grid>
           </Grid>
-          <Grid item xs={0} lg={1}>
-            {/* spacer */}
-          </Grid>
-        </Grid>
-      </main>
-    </div>
-  );
+        </main>
+      </div>
+    );
+  };
 }
 
 export default Tracking;
