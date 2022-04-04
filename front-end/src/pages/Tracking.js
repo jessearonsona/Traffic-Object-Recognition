@@ -5,14 +5,14 @@
 //       4) Auto-quit when time to run model has elapsed or when recorded video is complete
 //       5) Components to show results for recorded video or still image with option to send to DB?
 
-import React, { useState } from "react";
+import React from "react";
 import { Button, Container, Grid, Input, Typography } from "@material-ui/core";
-import Webcam from "react-webcam";
 import { loadGraphModel } from "@tensorflow/tfjs-converter";
 
 import AddIcon from "@mui/icons-material/Add";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import * as tf from "@tensorflow/tfjs";
+import { VideoCorrelationTracker } from "dlib-correlation-tracker-js";
 
 import "../styling/TrackingAndConditions.css";
 import Header from "../components/Header";
@@ -30,11 +30,11 @@ const load_model = async () => {
   //"https://raw.githubusercontent.com/hugozanini/TFJS-object-detection/master/models/kangaroo-detector/model.json"
   //);
 
-  console.log("model loaded");
   return model;
 };
 
 const threshold = 0.5;
+const framesToTrack = 20;
 
 // TODO: validate labels for 4 class model
 let classesDir = {
@@ -64,6 +64,10 @@ class Tracking extends React.Component {
 
     this.imageTypes = ["jpg", "jpeg", "png"];
     this.videoTypes = ["mp4", "mkv", "wmv", "mov"];
+    this.trackers = [];
+    this.frame = 0;
+    this.upCount = 0;
+    this.sideCount = 0;
 
     this.state = {
       showWebcam: false,
@@ -111,16 +115,16 @@ class Tracking extends React.Component {
 
       reader.readAsDataURL(event.target.files[0]);
     }
-  }
+  };
 
   displayWebcam = () => {
     this.setState({ showWebcam: true });
-    console.log("Showing webcam");
     document.getElementById("cameraConnect").style.display = "none";
     this.runModelDetections();
   };
 
   runModelDetections = () => {
+    console.log("Initiating Tracking Loop");
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       const webCamPromise = navigator.mediaDevices
         .getUserMedia({
@@ -130,7 +134,6 @@ class Tracking extends React.Component {
           },
         })
         .then((stream) => {
-          console.log("Got camera stream");
           window.stream = stream;
           this.videoRef.current.srcObject = stream;
           return new Promise((resolve, reject) => {
@@ -142,6 +145,7 @@ class Tracking extends React.Component {
 
       const modelPromise = load_model();
 
+      //TODO: Set Canvas Position Before Model is loading, so that failure to load the model doesn't break the Look
       console.log("Awaiting webcam and model...");
       Promise.all([modelPromise, webCamPromise])
         .then((values) => {
@@ -156,9 +160,7 @@ class Tracking extends React.Component {
   };
 
   setCanvasPosition = () => {
-    console.log("Setting canvas position");
     let rect = this.videoRef.current.getBoundingClientRect();
-    console.log(rect);
     let ref = this.canvasRef.current;
 
     ref.width = rect.width;
@@ -166,15 +168,77 @@ class Tracking extends React.Component {
     ref.className = "canvas";
   };
 
-  detectFrame = (video, model) => {
-    tf.engine().startScope();
-    model.executeAsync(this.process_input(video)).then((predictions) => {
-      this.renderPredictions(predictions, video);
-      requestAnimationFrame(() => {
-        this.detectFrame(video, model);
-      });
-      tf.engine().endScope();
+  buildTrackersFromDetections = (detections) => {};
+
+  updateTrackers = () => {
+    let trackers = [];
+    this.state.trackers.forEach((tracker) => {
+      // get prediction and update tracker
+      const { x, y, width, height } = tracker.tracker.predict;
+
+      // render predictions
+      this.renderBox({ x, y, width, height }, tracker.class);
+
+      // if prediciton is Out of bounds remove it
+
+      // if prediction cross ROI update ROI count
     });
+
+    // set updated trackers
+    this.setState({ trackers: trackers });
+  };
+
+  renderTrackers = (trackers) => {
+    // TODO Render trackers
+  };
+
+  detectFrame = async (video, model) => {
+    while (true) {
+      this.frame = (this.frame + 1) % framesToTrack;
+
+      if (this.frame === 0) {
+        // Run Detection
+
+        tf.engine().startScope();
+        let predictions = await model.executeAsync(this.process_input(video));
+        let detections = this.getDetectionsFromPredictions(predictions);
+
+        if (detections.length > 0) {
+          console.log("detections");
+          console.log(detections);
+
+          // create a tracker for each detected object and save them in the trackers list
+          detections.forEach((obj) => {
+            let new_tracker = new VideoCorrelationTracker(
+              document.getElementById('webcamVideo'),
+              {
+                x: obj.bbox[0],
+                y: obj.bbox[1],
+                width: obj.bbox[2] - obj.bbox[0], // x2 - 1 == width,
+                height: obj.bbox[3] - obj.bbox[1], // y2 - y1 == height,
+              }
+            );
+
+            this.trackers.push({
+              tracker: new_tracker,
+              label: obj.class,
+            });
+
+            console.log("trackers");
+            console.log(this.trackers);
+          });
+        }
+        tf.engine().endScope();
+      } else {
+        // Perform Tracking
+        if (this.trackers.length > 0) {
+          console.log("trackers");
+          console.log(this.trackers);
+        }
+      }
+
+      this.renderTrackers(this.trackers);
+    }
   };
 
   process_input(video_frame) {
@@ -209,17 +273,7 @@ class Tracking extends React.Component {
     return detectionObjects;
   }
 
-  renderPredictions = (predictions) => {
-    const ctx = this.canvasRef.current.getContext("2d");
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
-    // Font options.
-    const font = "16px sans-serif";
-    ctx.font = font;
-    ctx.textBaseline = "top";
-
-    //Getting predictions
-
+  getDetectionsFromPredictions = (predictions) => {
     // Car Model 4 classes
     const boxes = predictions[2].arraySync();
     // [4] could be scores [[float; 5]; 100]. [7] could be scores [float; 100]
@@ -234,6 +288,18 @@ class Tracking extends React.Component {
       classes,
       classesDir
     );
+
+    return detections;
+  };
+
+  renderDetections = (detections) => {
+    const ctx = this.canvasRef.current.getContext("2d");
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+    // Font options.
+    const font = "16px sans-serif";
+    ctx.font = font;
+    ctx.textBaseline = "top";
 
     detections.forEach((item) => {
       const x = item["bbox"][0];
@@ -311,11 +377,11 @@ class Tracking extends React.Component {
                             id="webcamVideo"
                             className="trackerVideo"
                             autoPlay
-                            playsInLine
+                            playsInline
                             muted
                             ref={this.videoRef}
                           />
-                          <canvas classname="canvas" ref={this.canvasRef} />
+                          <canvas className="canvas" ref={this.canvasRef} />
                         </div>
                       )}
                     </Container>
