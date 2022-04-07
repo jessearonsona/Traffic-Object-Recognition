@@ -13,6 +13,20 @@
   margin-right: 10px;
 }
 
+#quitButton {
+  margin-right: 30px;
+}
+
+#runningGrid {
+  display: flex;
+  justify-content: flex-end;
+}
+
+#runMessage {
+  font-size: larger;
+  font-weight: bold;
+}
+
 #startButton {
   margin-right: 30px;
 }

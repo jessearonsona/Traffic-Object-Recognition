@@ -11,28 +11,19 @@ const Header = () => {
     <div id="siteHeader">
         <div id="headerTop">        
             <img src={logo} id="headerLogo" alt="NDSU" />
-             
-            
             <div class="dropdown">
-           
-            
-            <IconButton id="accountIcon" class="dropbtn"> 
-            <AccountCircleIcon fontSize= "large"/> 
-            </IconButton> 
-           
-            <div class="dropdown-content">
-            <a href="http://localhost:3000/Account">My account</a>
-            <a href="http://localhost:3000">Logout</a>
-            
+              <IconButton id="accountIcon" class="dropbtn"> 
+                <AccountCircleIcon fontSize= "large"/> 
+              </IconButton> 
+              <div class="dropdown-content">
+                <a href="http://localhost:3000/Account">My account</a>
+                <a href="http://localhost:3000">Logout</a>
+              </div>
             </div>
-            </div>
-           
-
         </div>
         <div id="headerBottom">
             Upper Great Plains Transportation Institute
         </div>
-        
     </div>
   );
 };
