@@ -11,18 +11,20 @@ const Header = () => {
     <div id="siteHeader">
         <div id="headerTop">        
             <img src={logo} id="headerLogo" alt="NDSU" />
+            <div id="headerBottom">
+            Upper Great Plains Transportation Institute
             <div class="dropdown">
+              <div className="move_right">
               <IconButton id="accountIcon" class="dropbtn"> 
                 <AccountCircleIcon fontSize= "large"/> 
               </IconButton> 
+              </div>
               <div class="dropdown-content">
                 <a href="http://localhost:3000/Account">My account</a>
                 <a href="http://localhost:3000">Logout</a>
               </div>
             </div>
         </div>
-        <div id="headerBottom">
-            Upper Great Plains Transportation Institute
         </div>
     </div>
   );

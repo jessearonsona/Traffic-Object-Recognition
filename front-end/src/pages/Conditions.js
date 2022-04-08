@@ -10,6 +10,11 @@ import AddIcon from "@mui/icons-material/Add";
 
 import * as tf from "@tensorflow/tfjs";
 
+
+//these 2 lines were put before "const Conditions = () =>" line
+import { useState } from "react";
+import CameraAltIcon from "@mui/icons-material/CameraAlt";
+
 async function load_model() {
   // It's possible to load the model locally or from a repo
   // You can choose whatever IP and PORT you want in the "http://127.0.0.1:8080/model.json" just set it before in your https server
@@ -28,8 +33,6 @@ const ROAD_CONDITIONS = {
 
 const roadLabels = ['Clear', 'Ice', "Snow", "Partial Snow", "Wet"];
 
-import { useState } from "react";
-import CameraAltIcon from "@mui/icons-material/CameraAlt";
 
 
 const Conditions = () => {
