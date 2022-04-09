@@ -9,6 +9,8 @@ import Webcam from "react-webcam";
 import AddIcon from "@mui/icons-material/Add";
 
 import * as tf from "@tensorflow/tfjs";
+import { useState } from "react";
+import CameraAltIcon from "@mui/icons-material/CameraAlt";
 
 async function load_model() {
   // It's possible to load the model locally or from a repo
@@ -22,15 +24,10 @@ const ROAD_CONDITIONS = {
   1: "Ice",
   2: "Partial Snow",
   3: "Snow",
-  4: "Wet"
-
+  4: "Wet",
 };
 
-const roadLabels = ['Clear', 'Ice', "Snow", "Partial Snow", "Wet"];
-
-import { useState } from "react";
-import CameraAltIcon from "@mui/icons-material/CameraAlt";
-
+const roadLabels = ["Clear", "Ice", "Snow", "Partial Snow", "Wet"];
 
 const Conditions = () => {
   const [showWebcam, setShowWebcam] = useState(false);
@@ -85,52 +82,48 @@ const Conditions = () => {
     }
   }
 
-
-
   //runs the model on a given image
   const runModel = async (test_image) => {
     const model = await load_model();
-   
+
     //converting the image to a formatted tensor
-    let tensor = tf.browser.fromPixels(test_image, 3)
+    let tensor = tf.browser
+      .fromPixels(test_image, 3)
       .resizeNearestNeighbor([224, 224])
       .expandDims()
-      .toFloat()
-    
-    //feeding the image in. 
+      .toFloat();
+
+    //feeding the image in.
     let predictions = await model.predict(tensor).data();
 
-    const evalOutput = model.evaluate
-
-
-
+    const evalOutput = model.evaluate;
 
     console.log(predictions);
 
     let top5 = Array.from(predictions)
-		.map(function (p, i) { // this is Array.map
-			return {
-				probability: p,
-				className: ROAD_CONDITIONS[i] // we are selecting the value from the obj
-			};
-		}).sort(function (a, b) {
-      console.log("b: " + b + b.probability)
-			return b.probability - a.probability;
-		}).slice(0, 5); //Determines how many of the top results it shows
+      .map(function (p, i) {
+        // this is Array.map
+        return {
+          probability: p,
+          className: ROAD_CONDITIONS[i], // we are selecting the value from the obj
+        };
+      })
+      .sort(function (a, b) {
+        console.log("b: " + b + b.probability);
+        return b.probability - a.probability;
+      })
+      .slice(0, 5); //Determines how many of the top results it shows
 
     let output = "Predcitions: ";
     top5.forEach(function (p) {
-        output += `${p.className}: ${p.probability.toFixed(6)}\n`; //probability is not probabilty atm. Need to fix
+      output += `${p.className}: ${p.probability.toFixed(6)}\n`; //probability is not probabilty atm. Need to fix
     });
 
-      //console.log(top5); //showing our current prediction. This is what we need. 
-      console.log(top5[0].className);
-      console.log(output);
-      console.log(predictions);
-  }
-
-
-
+    //console.log(top5); //showing our current prediction. This is what we need.
+    console.log(top5[0].className);
+    console.log(output);
+    console.log(predictions);
+  };
 
   function displayWebcam() {
     setShowWebcam(true);
