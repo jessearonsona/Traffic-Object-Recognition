@@ -69,4 +69,23 @@ const loginUser = async (user) => {
   }
 };
 
-module.exports = { addUser, getUsers, loginUser };
+// Function to change a user to admin status
+const changeAdminStatus = async (user) => {
+  try {
+    let pool = await sql.connect(dbConfig);
+    let updatedUser = await pool
+      .request()
+      .query(
+        "UPDATE User_Details SET User_IsAdmin= " +
+          user.User_IsAdmin +
+          " WHERE Id = " +
+          user.Id
+      );
+    console.log(updatedUser);
+    return updatedUser;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+module.exports = { addUser, getUsers, loginUser, changeAdminStatus };

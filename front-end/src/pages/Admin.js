@@ -85,6 +85,7 @@ const Admin = () => {
     setPage(0);
   }
 
+  //*******************************FUNCTIONS TO MANAGE OPENING/CLOSING POPUPS******************************* */
   //Opens to admin popup
   function openToAdmin(ID) {
     setEditID(ID);
@@ -129,6 +130,7 @@ const Admin = () => {
     setToUserPopup(false);
   }
 
+  //*******************************FUNCTIONS TO MODIFY USER DATA******************************* */
   //Sends reset password link
   function resetPassword() {
     closePopup();
@@ -139,16 +141,49 @@ const Admin = () => {
     closePopup();
   }
 
-  //Changes account status to administrator
-  function changeToAdmin() {
+  // Changes user account status to administrator
+  const changeToAdmin = async (userID) => {
+    const response = await axios.put(
+      "/api/users/" + userID,
+      JSON.stringify({
+        Id: userID,
+        User_Name: name,
+        User_Email: email,
+        User_Password: password,
+        User_IsAdmin: 1,
+      }),
+      {
+        headers: { "Content-Type": "application/json" },
+        // withCredentials: true,
+      }
+    );
+    console.log(response.status);
     closePopup();
-  }
+    populateTable();
+  };
 
   //Changes account status to normal user
-  function changeToUser() {
+  const changeToUser = async (userID) => {
+    const response = await axios.put(
+      "/api/users/" + userID,
+      JSON.stringify({
+        Id: userID,
+        User_Name: name,
+        User_Email: email,
+        User_Password: password,
+        User_IsAdmin: 0,
+      }),
+      {
+        headers: { "Content-Type": "application/json" },
+        // withCredentials: true,
+      }
+    );
+    console.log(response.status);
     closePopup();
-  }
+    populateTable();
+  };
 
+  //*******************************FUNCTIONS TO VALIDATE NEW USER DATA******************************* */
   // // Validate email and password when registering new user
   // const EMAIL_REGEX = "[a-z0-9]+@ndsu.edu";
   // const PASSWORD_REGEX = "/^(?-.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{4,24}$/";
@@ -273,17 +308,17 @@ const Admin = () => {
     }
   };
 
-  const adminIcon = (
-    <Tooltip title="Administrator">
-      <SupervisorAccountIcon />
-    </Tooltip>
-  );
-
   // const rows = [
   //   createData(1, 1111, true, "Annika Hansen", "email@email.com"),
   //   createData(2, 2222, false, "Agnes Jurati", "email@email.com"),
   // ];
   const rows = [...userData];
+
+  const adminIcon = (
+    <Tooltip title="Administrator">
+      <SupervisorAccountIcon />
+    </Tooltip>
+  );
 
   return (
     <div>
@@ -317,7 +352,7 @@ const Admin = () => {
                 {rows
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((row, i) => (
-                    <TableRow key={i} className="row">
+                    <TableRow key={row.Id} className="row">
                       <TableCell style={{ width: "10px" }}>
                         {row.User_IsAdmin === true ? adminIcon : ""}
                       </TableCell>
@@ -333,7 +368,11 @@ const Admin = () => {
                         {/* If account is normal user */}
                         {!row.User_IsAdmin && (
                           <Tooltip title="Change to administrator">
-                            <IconButton onClick={() => openToAdmin(row.id)}>
+                            <IconButton
+                              onClick={() => {
+                                openToAdmin(row.Id);
+                              }}
+                            >
                               <SupervisorAccountIcon
                                 style={{ color: "#18563e" }}
                               />
@@ -343,7 +382,7 @@ const Admin = () => {
                         {/* If account is admin */}
                         {row.User_IsAdmin && (
                           <Tooltip title="Change to user">
-                            <IconButton onClick={() => openToUser(row.id)}>
+                            <IconButton onClick={() => openToUser(row.Id)}>
                               <PersonIcon style={{ color: "#18563e" }} />
                             </IconButton>
                           </Tooltip>
@@ -398,6 +437,7 @@ const Admin = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
       {/* Password popup */}
       <Dialog open={passwordPopup} onClose={closePopup}>
         <DialogTitle>Reset Password</DialogTitle>
@@ -411,6 +451,7 @@ const Admin = () => {
           <Button onClick={resetPassword}>Send</Button>
         </DialogActions>
       </Dialog>
+
       {/* New user popup */}
       <Dialog open={newUserPopup} onClose={closePopup}>
         <DialogTitle>New User</DialogTitle>
@@ -508,6 +549,7 @@ const Admin = () => {
         </DialogContent>
         <Button onClick={closePopup}>Close</Button>
       </Dialog>
+
       {/* To admin popup */}
       <Dialog open={toAdminPopup} onClose={closePopup}>
         <DialogTitle>Administrator</DialogTitle>
@@ -518,9 +560,10 @@ const Admin = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={closePopup}>Cancel</Button>
-          <Button onClick={changeToAdmin}>Continue</Button>
+          <Button onClick={() => changeToAdmin(editID)}>Continue</Button>
         </DialogActions>
       </Dialog>
+
       {/* To user popup */}
       <Dialog open={toUserPopup} onClose={closePopup}>
         <DialogTitle>User</DialogTitle>
@@ -531,7 +574,7 @@ const Admin = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={closePopup}>Cancel</Button>
-          <Button onClick={changeToUser}>Continue</Button>
+          <Button onClick={() => changeToUser(editID)}>Continue</Button>
         </DialogActions>
       </Dialog>
     </div>

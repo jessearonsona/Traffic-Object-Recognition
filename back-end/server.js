@@ -75,14 +75,28 @@ app.use(express.json());
 
 app.use("/users", userRoutes);
 
-// Route Handlers
+// Route Handlers To Manage User Data
+// Get All Users
 app.get("/api/users", async (req, res) => {
   const result = await dbOperations.getUsers();
   res.send(result.recordset);
 });
 
+// Register New User
 app.post("/api/users", async (req, res) => {
   const result = await dbOperations.addUser(req.body);
+  res.send(result);
+});
+
+// Change Admin Status
+app.put("/api/users/:id", async (req, res) => {
+  const result = await dbOperations.changeAdminStatus(req.body);
+  res.send(result);
+});
+
+// Delete a User
+app.delete("/api/users/:id", async (req, res) => {
+  const result = await dbOperations.changeAdminStatus(req.body);
   res.send(result);
 });
 
