@@ -95,8 +95,8 @@ app.put("/api/users/:id", async (req, res) => {
 });
 
 // Delete a User
-app.delete("/api/users/:id", async (req, res) => {
-  const result = await dbOperations.changeAdminStatus(req.body);
+app.post("/api/users/:id", async (req, res) => {
+  const result = await dbOperations.deleteUser(req.body);
   res.send(result);
 });
 

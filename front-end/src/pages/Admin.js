@@ -137,9 +137,26 @@ const Admin = () => {
   }
 
   //Deletes user
-  function deleteUser() {
+  const deleteUser = async (userID) => {
+    console.log("Deleting User: " + userID);
+    const response = await axios.post(
+      "/api/users/" + userID,
+      JSON.stringify({
+        Id: userID,
+        User_Name: name,
+        User_Email: email,
+        User_Password: password,
+        User_IsAdmin: 1,
+      }),
+      {
+        headers: { "Content-Type": "application/json" },
+        // withCredentials: true,
+      }
+    );
+    console.log(response.status);
     closePopup();
-  }
+    populateTable();
+  };
 
   // Changes user account status to administrator
   const changeToAdmin = async (userID) => {
@@ -361,7 +378,7 @@ const Admin = () => {
                       <TableCell>{row.User_Email}</TableCell>
                       <TableCell>
                         <Tooltip title="Reset password">
-                          <IconButton onClick={() => openPassword(row.id)}>
+                          <IconButton onClick={() => openPassword(row.Id)}>
                             <PasswordIcon style={{ color: "#18563e" }} />
                           </IconButton>
                         </Tooltip>
@@ -388,7 +405,7 @@ const Admin = () => {
                           </Tooltip>
                         )}
                         <Tooltip title="Delete user">
-                          <IconButton onClick={() => openDelete(row.id)}>
+                          <IconButton onClick={() => openDelete(row.Id)}>
                             <DeleteForeverIcon style={{ color: "red" }} />
                           </IconButton>
                         </Tooltip>
@@ -420,6 +437,7 @@ const Admin = () => {
           <AddIcon style={{ marginTop: "-50px" }} />
         </div>
       </Fab>
+
       {/* Delete popup */}
       <Dialog open={deletePopup} onClose={closePopup}>
         <DialogTitle>Delete</DialogTitle>
@@ -432,7 +450,7 @@ const Admin = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={closePopup}>Cancel</Button>
-          <Button style={{ color: "red" }} onClick={deleteUser}>
+          <Button style={{ color: "red" }} onClick={() => deleteUser(editID)}>
             Delete
           </Button>
         </DialogActions>
@@ -539,6 +557,7 @@ const Admin = () => {
           <Button onClick={newUserSubmit}>Submit</Button>
         </DialogActions>
       </Dialog>
+
       {/* Error popup */}
       <Dialog open={errorPopup} onClose={closePopup}>
         <DialogTitle>Error :(</DialogTitle>

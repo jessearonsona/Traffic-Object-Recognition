@@ -88,4 +88,23 @@ const changeAdminStatus = async (user) => {
   }
 };
 
-module.exports = { addUser, getUsers, loginUser, changeAdminStatus };
+// Function to delete a user
+const deleteUser = async (user) => {
+  try {
+    let pool = await sql.connect(dbConfig);
+    let deletedUser = await pool
+      .request()
+      .query("DELETE FROM User_Details WHERE Id = " + user.Id);
+    return deletedUser;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+module.exports = {
+  addUser,
+  changeAdminStatus,
+  deleteUser,
+  getUsers,
+  loginUser,
+};
