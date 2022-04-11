@@ -173,30 +173,28 @@ const Admin = () => {
   //   setErrMsg("");
   // }, [email, password, passwordCheck]);
 
-  // const populateTable = async () => {
-  //   try {
-  //     const response = await axios.get("/api/users");
-  //     setUserData(response.data);
-  //     // clear user fields to allow for proper register user functionality
-  //     setUserId();
-  //     setName("");
-  //     setEmail("");
-  //     setIsAdmin();
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
+  const populateTable = async () => {
+    try {
+      const response = await axios.get("/api/users");
+      setUserData(response.data);
+      // clear user fields to allow for proper register user functionality
+      setUserId();
+      setName("");
+      setEmail("");
+      setIsAdmin(0);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-  // useEffect(() => {
-  //   populateTable();
-  // }, []);
+  useEffect(() => {
+    populateTable();
+  }, []);
 
   // Convert string true/false to boolean value
-  const stringToBoolean = (value) => {
-    if (value && typeof value === "string") {
-      if (value.toLowerCase() === "true") return 1;
-      if (value.toLowerCase() === "false") return 0;
-    }
+  const convertToBoolean = (value) => {
+    if (value === true) return 1;
+    if (value === false) return 0;
     return value;
   };
 
@@ -231,7 +229,6 @@ const Admin = () => {
     else {
       try {
         userId = parseInt(userId);
-        // setIsAdmin(1);
 
         const response = await axios.post(
           "/api/users",
@@ -271,7 +268,8 @@ const Admin = () => {
       //     ", Administrator:  " +
       //     isAdmin
       // );
-      // closePopup();
+      closePopup();
+      populateTable();
     }
   };
 
@@ -281,11 +279,11 @@ const Admin = () => {
     </Tooltip>
   );
 
-  const rows = [
-    createData(1, 1111, true, "Annika Hansen", "email@email.com"),
-    createData(2, 2222, false, "Agnes Jurati", "email@email.com"),
-  ];
-  // const rows = [...userData];
+  // const rows = [
+  //   createData(1, 1111, true, "Annika Hansen", "email@email.com"),
+  //   createData(2, 2222, false, "Agnes Jurati", "email@email.com"),
+  // ];
+  const rows = [...userData];
 
   return (
     <div>
@@ -471,7 +469,7 @@ const Admin = () => {
             control={
               <Checkbox
                 color="primary"
-                onChange={(e) => setIsAdmin(stringToBoolean(e.target.checked))}
+                onChange={(e) => setIsAdmin(convertToBoolean(e.target.checked))}
               />
             }
             label="Administrator"
