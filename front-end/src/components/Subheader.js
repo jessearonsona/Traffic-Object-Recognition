@@ -16,14 +16,13 @@ import roads from "../arrays/roads";
 import "../styling/TrackingAndConditions.css";
 import "./Subheader.css";
 
-const Subheader = () => {
+const Subheader = (props) => {
   // Get current page to use for conditional rendering
   const location = useLocation();
   const pathname = location.pathname;
 
   // Get selection from roads dropdown
   const [value, setValue] = useState("");
-  const handleChange = (e) => setValue(e.target.value);
 
   // Function to change the variant of the page selector buttons depending on which
   // page is currently selected
@@ -34,6 +33,12 @@ const Subheader = () => {
       return path === "/tracking" ? "outlined" : "contained";
     }
   };
+
+  // Send road info to parent component (conditions/tracking)
+  function handleChange(e) {
+    setValue(e.target.value);
+    props.getRoad(e.target.value);
+  }
 
   return (
     <div id="subheaderContainer">
@@ -73,7 +78,7 @@ const Subheader = () => {
             >
               {roads.map((road, index) => {
                 return (
-                  <MenuItem key={index} value={index}>
+                  <MenuItem key={index} value={road}>
                     {road}
                   </MenuItem>
                 );

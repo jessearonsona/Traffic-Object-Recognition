@@ -5,7 +5,7 @@ import Tracking from "./pages/Tracking";
 import Conditions from "./pages/Conditions";
 import ResetPW from "./pages/ResetPW";
 import Account from "./pages/Account";
-import Home from "./pages/Home";
+import Running from "./pages/Running";
 import Admin from "./pages/Admin";
 
 const theme = createTheme({
@@ -29,7 +29,7 @@ function App() {
           <Route path="/conditions" element={<Conditions />} />
           <Route path="/ResetPW" element={<ResetPW />} />
           <Route path="/Account" element={<Account />} />
-          <Route path="/home" element={<Home />} />
+          <Route path="/running/" element={<Running />} />
           <Route path="/admin" element={<Admin />} />
         </Routes>
       </Router>
