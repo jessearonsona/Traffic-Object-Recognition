@@ -18,7 +18,7 @@ logger.setLevel(logging.ERROR)
 #global constants
 batch_size = 32
 image_size = 224
-image_shape = [224, 224]
+image_shape = [image_size, image_size]
 num_tfr_classes = 2
 num_conditions = 5
 EPOCHS = 2
@@ -42,7 +42,7 @@ class Args:
 
     def get_args():
         parser = argparse.ArgumentParser()
-        parser.add_argument("--train_dir")
+        parser.add_argument("--train_dir", type = str)
         parser.add_argument("--val_dir")
         parser.add_argument("--model_loc")
         parser.add_argument("--save_loc")
@@ -163,11 +163,11 @@ def class_id_to_name(id: int) -> str:
     return 'wet'
 
 def main():
-    #args = Args.get_args()
-    args = Args(r"C:\Users\Jesse\Desktop\School Stuff\Comp Sci\Senior Project\tfrecord\train", 
-    r"C:\Users\Jesse\Desktop\School Stuff\Comp Sci\Senior Project\tfrecord\test",
-    "https://tfhub.dev/google/imagenet/mobilenet_v2_075_224/classification/5",
-    r"C:\Users\Jesse\Desktop\School Stuff\Comp Sci\Senior Project\tfrecord") #Currently a placeholder. I can't get args to load in correctly. Will ask Dalton
+    args = Args.get_args()
+    #args = Args(r"train_loc", 
+    #r"val_loc",
+    #"https://tfhub.dev/google/imagenet/mobilenet_v2_075_224/classification/5", #best model from my tests
+    #r"save_loc") #If you want to run this in an IDE enter this here and comment out the args.get_args
     train_set, val_set = load_records(args)
     print(args.model_loc)
     model = load_model(args)
@@ -182,7 +182,7 @@ def main():
     plot_training(history)
     view_guesses(model, val_set)
 
-    #model.save(args.save_loc) #saves the model to the specified location
+    model.save(args.save_loc) #saves the model to the specified location
 
 if __name__ == '__main__':
     main()
