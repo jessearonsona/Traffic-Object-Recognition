@@ -1,0 +1,52 @@
+#video {
+    transform: rotateY(180deg);
+    width: 100%;
+    top: 0;
+    left: 0;
+}
+
+.info {
+    padding: 15px;
+}
+
+#stop-button {
+    margin: 15px;
+    float: right;
+}
+
+#report-info {
+    overflow-y: auto;
+    border-style: solid;
+    border-radius: 5px;
+    padding: 3px;
+    width: 300px;
+    border-color: #18563e;
+    height: 300px;
+}
+
+.center {
+    margin: auto;
+}
+
+.mainContent {
+    margin-top: 70px;
+}
+
+.canvas {
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.video-container {
+    position: relative;
+    margin: 0 auto;
+    padding: 0;
+}
+
+@media only screen and (max-width: 940px) {
+    #report-info {
+        height: 200px;
+    }
+}
