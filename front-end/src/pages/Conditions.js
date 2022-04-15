@@ -41,6 +41,8 @@ const Conditions = () => {
 
     };
 
+    var csvOutput = [ ['Date', 'Time', 'Condition'],];
+
     // Get all info from child components
     const getRoad = useCallback((data) => {
         setRoad(data)
@@ -122,6 +124,40 @@ const Conditions = () => {
         }
     }
 
+    function getTime() {
+        const hour = new Date().getHours();
+        const minute = new Date().getMinutes();
+        const second = new Date().getSeconds();
+
+        const time = hour + ":" + minute + ":" + second;
+
+        return time;
+    }
+
+    function getDate() {
+        const day = new Date().getDate();
+        const year = new Date().getFullYear();
+        const month = new Date().getMonth();
+        const date = day + '/' + month + '/' + year;
+        
+        return date;
+    }
+
+    function download_csv() {
+        var csv = '';
+        csvOutput.forEach(function(row) {
+            csv += row.join(',');
+            csv += "\n";
+          })
+      
+        var hiddenElm = document.createElement('a');
+        hiddenElm.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+        hiddenElm.target = '_blank';
+      
+        hiddenElm.download = 'Condition Report.csv';
+        hiddenElm.click();
+    }
+
     // Runs the conditions model on webcam image
     async function runConditionsModel(image) {
         const model = await getConditionsModel();
@@ -155,8 +191,8 @@ const Conditions = () => {
 
         //console.log(top5); //showing our current prediction. This is what we need.
         console.log(top5[0].className);
-        console.log(output);
-        console.log(predictions);
+        csvOutput.push([getDate(), getTime(), top5[0].className]);
+        console.log(csvOutput);
 
         alert(top5[0].className)
     }
