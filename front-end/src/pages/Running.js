@@ -184,10 +184,10 @@ const Running = () => {
 
     // Start model
     function start() {
-        alignCanvas()
         setTimer(true)
 
         if (model === "tracking") {
+            alignCanvas()
             runTrackingModel()
         }
     }

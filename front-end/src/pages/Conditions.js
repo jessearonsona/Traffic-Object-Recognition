@@ -3,12 +3,13 @@ import "../styling/TrackingAndConditions.css";
 import Header from "../components/Header";
 import Subheader from "../components/Subheader";
 import OptionPane from "../components/OptionPane";
-import {Button, Container, Grid, Input, Typography} from "@material-ui/core";
+import {Button, Container, Grid, IconButton, Input, Tooltip, Typography} from "@material-ui/core";
 import AddIcon from "@mui/icons-material/Add";
 import React, {useCallback, useRef, useState} from "react";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import {useLocation, useNavigate} from "react-router-dom";
 import * as tf from "@tensorflow/tfjs";
+import IosShareIcon from '@mui/icons-material/IosShare';
 
 // It's possible to load the model locally or from a repo
 // You can choose whatever IP and PORT you want in the "http://127.0.0.1:8080/model.json" just set it
@@ -41,7 +42,7 @@ const Conditions = () => {
 
     };
 
-    var csvOutput = [ ['Date', 'Time', 'Condition'],];
+    var csvOutput = [['Date', 'Time', 'Condition'],];
 
     // Get all info from child components
     const getRoad = useCallback((data) => {
@@ -139,21 +140,21 @@ const Conditions = () => {
         const year = new Date().getFullYear();
         const month = new Date().getMonth();
         const date = day + '/' + month + '/' + year;
-        
+
         return date;
     }
 
     function download_csv() {
         var csv = '';
-        csvOutput.forEach(function(row) {
+        csvOutput.forEach(function (row) {
             csv += row.join(',');
             csv += "\n";
-          })
-      
+        })
+
         var hiddenElm = document.createElement('a');
         hiddenElm.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
         hiddenElm.target = '_blank';
-      
+
         hiddenElm.download = 'Condition Report.csv';
         hiddenElm.click();
     }
@@ -194,7 +195,10 @@ const Conditions = () => {
         csvOutput.push([getDate(), getTime(), top5[0].className]);
         console.log(csvOutput);
 
-        alert(top5[0].className)
+        // Show export button
+        document.getElementById("export-button").style.display = "block";
+
+        alert("Prediction: " + top5[0].className)
     }
 
     // Show webcam video
@@ -311,16 +315,27 @@ const Conditions = () => {
                                                     value={""}
                                                     style={{display: "none"}}
                                                 />
-                                                <Button
-                                                    id="upload-button"
-                                                    variant="contained"
-                                                    color="primary"
-                                                    component="span"
-                                                    startIcon={<AddIcon/>}
-                                                    style={{margin: "5px", marginTop: "100px"}}
-                                                >
-                                                    Upload
-                                                </Button>
+                                                <Grid container columnSpacing={{xs: 1, sm: 2, md: 3}} justifyContent={"center"}>
+                                                    <Grid item>
+                                                        <Button
+                                                            id="upload-button"
+                                                            variant="contained"
+                                                            color="primary"
+                                                            component="span"
+                                                            startIcon={<AddIcon/>}
+                                                            style={{margin: "5px", marginTop: "100px"}}
+                                                        >
+                                                            Upload
+                                                        </Button>
+                                                    </Grid>
+                                                    <Grid item>
+                                                        <Tooltip title="Export report to csv" style={{display: "none"}}>
+                                                            <IconButton id="export-button" onClick={download_csv}>
+                                                                <IosShareIcon style={{color: "#18563e"}}/>
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                    </Grid>
+                                                </Grid>
                                             </label>
                                         </div>
                                     </Container>
