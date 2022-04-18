@@ -28,6 +28,7 @@ async function getTrackingModel() {
 }
 
 const THRESHOLD = 0.5;
+var csvOutput = [ ['Date', 'Time', 'Condition'],];
 
 let VEHICLE_CLASSES = {
     1: {
@@ -64,7 +65,7 @@ const Running = () => {
     const [timer, setTimer] = useState(false)
     const [title, setTitle] = useState("")
     const [road, setRoad] = useState("")
-    const [reportTime, setReportTime] = useState(0)
+    const [reportTime, setReportTime] = useState(1)
     const [duration, setDuration] = useState(0)
     const [model, setModel] = useState(null)
     const [direction, setDirection] = useState("")
@@ -72,6 +73,7 @@ const Running = () => {
     const [stopPopup, setStopPopup] = useState(false)
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
+ 
 
     // Increment timer, run condition model, and send report
     useEffect(() => {
@@ -90,12 +92,13 @@ const Running = () => {
             let sec = (time / 1000) % 60
 
             // If running conditions and time to run model
-            if (model === "conditions" && ((sec === 0 && min % reportTime === 0) || TESTING)) {
+            console.log(min + " " +  reportTime);
+            if (model === "Conditions" && ((sec === 0 && min % reportTime === 0))) {
                 runConditionsModel()
             }
 
             // If running tracking and time to send report
-            if (model === "tracking" && ((sec === 0 && min % reportTime === 0) || TESTING)) {
+            if (model === "Tracking" && ((sec === 0 && min % reportTime === 0) || TESTING)) {
                 // TODO
             }
 
@@ -108,11 +111,14 @@ const Running = () => {
         setModel(location.state.model)
         setDuration(location.state.duration)
         setRoad(location.state.road)
+        console.log('in get info');
+        console.log(model);
 
-        if (location.state.model === "conditions") {
+        if (location.state.model === "Conditions") {
             setTitle("Running Road Conditions")
             setReportTime(location.state.photoTime)
-        } else if (location.state.model === "tracking") {
+            console.log(reportTime);
+        } else if (location.state.model === "Tracking") {
             setTitle("Counting Vehicles")
             setReportTime(location.state.reportTime)
             setDirection(location.state.direction)
@@ -172,11 +178,15 @@ const Running = () => {
     // Finalize report info, stop video, and redirect
     function stop() {
         setTimer(false)
+        console.log("in stop");
+        download_csv();
         // Stop webcam
         let video = videoRef.current.srcObject;
         video.getTracks().forEach(function (track) {
             track.stop()
         });
+
+
 
         // Redirect
         window.location.replace("/" + model)
@@ -227,6 +237,40 @@ const Running = () => {
         return image;
     }
 
+    function getTime() {
+        const hour = new Date().getHours();
+        const minute = new Date().getMinutes();
+        const second = new Date().getSeconds();
+
+        const time = hour + ":" + minute + ":" + second;
+
+        return time;
+    }
+
+    function getDate() {
+        const day = new Date().getDate();
+        const year = new Date().getFullYear();
+        const month = new Date().getMonth();
+        const date = day + '/' + month + '/' + year;
+        
+        return date;
+    }
+
+    function download_csv() {
+        var csv = '';
+        csvOutput.forEach(function(row) {
+            csv += row.join(',');
+            csv += "\n";
+          })
+      
+        var hiddenElm = document.createElement('a');
+        hiddenElm.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+        hiddenElm.target = '_blank';
+      
+        hiddenElm.download = 'Condition Report.csv';
+        hiddenElm.click();
+    }
+
     // Runs the conditions model on webcam image
     async function runConditionsModel() {
         // Get image
@@ -243,8 +287,6 @@ const Running = () => {
         //feeding the image in.
         let predictions = await model.predict(tensor).data();
 
-        const evalOutput = model.evaluate
-
         let top5 = Array.from(predictions)
             .map(function (p, i) { // this is Array.map
                 return {
@@ -252,19 +294,13 @@ const Running = () => {
                     className: ROAD_CONDITIONS[i] // we are selecting the value from the obj
                 };
             }).sort(function (a, b) {
-                // console.log("b: " + b + b.probability)
                 return b.probability - a.probability;
             }).slice(0, 5); //Determines how many of the top results it shows
 
-        let output = "Predictions: ";
-        top5.forEach(function (p) {
-            output += `${p.className}: ${p.probability.toFixed(6)}\n`; //probability is not probability atm. Need to fix
-        });
-
         //console.log(top5); //showing our current prediction. This is what we need.
         console.log(top5[0].className);
-        console.log(output);
-        console.log(predictions);
+        // Appending the prediction onto the 
+        csvOutput.push([getDate(), getTime(), top5[0].className]);
 
         // Display report info on page
         appendReport(top5[0].className)
