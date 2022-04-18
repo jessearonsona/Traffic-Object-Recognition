@@ -28,6 +28,7 @@ async function getTrackingModel() {
 }
 
 const THRESHOLD = 0.5;
+var csvOutput = [ ['Date', 'Time', 'Condition'],];
 
 let VEHICLE_CLASSES = {
     1: {
@@ -172,11 +173,15 @@ const Running = () => {
     // Finalize report info, stop video, and redirect
     function stop() {
         setTimer(false)
+        console.log("in stop");
+        download_csv();
         // Stop webcam
         let video = videoRef.current.srcObject;
         video.getTracks().forEach(function (track) {
             track.stop()
         });
+
+
 
         // Redirect
         window.location.replace("/" + model)
@@ -227,6 +232,40 @@ const Running = () => {
         return image;
     }
 
+    function getTime() {
+        const hour = new Date().getHours();
+        const minute = new Date().getMinutes();
+        const second = new Date().getSeconds();
+
+        const time = hour + ":" + minute + ":" + second;
+
+        return time;
+    }
+
+    function getDate() {
+        const day = new Date().getDate();
+        const year = new Date().getFullYear();
+        const month = new Date().getMonth();
+        const date = day + '/' + month + '/' + year;
+        
+        return date;
+    }
+
+    function download_csv() {
+        var csv = '';
+        csvOutput.forEach(function(row) {
+            csv += row.join(',');
+            csv += "\n";
+          })
+      
+        var hiddenElm = document.createElement('a');
+        hiddenElm.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+        hiddenElm.target = '_blank';
+      
+        hiddenElm.download = 'Condition Report.csv';
+        hiddenElm.click();
+    }
+
     // Runs the conditions model on webcam image
     async function runConditionsModel() {
         // Get image
@@ -243,8 +282,6 @@ const Running = () => {
         //feeding the image in.
         let predictions = await model.predict(tensor).data();
 
-        const evalOutput = model.evaluate
-
         let top5 = Array.from(predictions)
             .map(function (p, i) { // this is Array.map
                 return {
@@ -252,19 +289,13 @@ const Running = () => {
                     className: ROAD_CONDITIONS[i] // we are selecting the value from the obj
                 };
             }).sort(function (a, b) {
-                // console.log("b: " + b + b.probability)
                 return b.probability - a.probability;
             }).slice(0, 5); //Determines how many of the top results it shows
 
-        let output = "Predictions: ";
-        top5.forEach(function (p) {
-            output += `${p.className}: ${p.probability.toFixed(6)}\n`; //probability is not probability atm. Need to fix
-        });
-
         //console.log(top5); //showing our current prediction. This is what we need.
         console.log(top5[0].className);
-        console.log(output);
-        console.log(predictions);
+        // Appending the prediction onto the 
+        csvOutput.push([getDate(), getTime(), top5[0].className]);
 
         // Display report info on page
         appendReport(top5[0].className)
