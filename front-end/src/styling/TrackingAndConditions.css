@@ -1,6 +1,7 @@
 #webcamVideo {
   max-height: 300px;
   max-width: 400px;
+  transform: rotateY(180deg);
 }
 
 #label-header {
