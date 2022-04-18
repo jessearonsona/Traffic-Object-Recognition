@@ -65,7 +65,7 @@ const Running = () => {
     const [timer, setTimer] = useState(false)
     const [title, setTitle] = useState("")
     const [road, setRoad] = useState("")
-    const [reportTime, setReportTime] = useState(0)
+    const [reportTime, setReportTime] = useState(1)
     const [duration, setDuration] = useState(0)
     const [model, setModel] = useState(null)
     const [direction, setDirection] = useState("")
@@ -73,6 +73,7 @@ const Running = () => {
     const [stopPopup, setStopPopup] = useState(false)
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
+ 
 
     // Increment timer, run condition model, and send report
     useEffect(() => {
@@ -91,12 +92,13 @@ const Running = () => {
             let sec = (time / 1000) % 60
 
             // If running conditions and time to run model
-            if (model === "conditions" && ((sec === 0 && min % reportTime === 0) || TESTING)) {
+            console.log(min + " " +  reportTime);
+            if (model === "Conditions" && ((sec === 0 && min % reportTime === 0))) {
                 runConditionsModel()
             }
 
             // If running tracking and time to send report
-            if (model === "tracking" && ((sec === 0 && min % reportTime === 0) || TESTING)) {
+            if (model === "Tracking" && ((sec === 0 && min % reportTime === 0) || TESTING)) {
                 // TODO
             }
 
@@ -109,11 +111,14 @@ const Running = () => {
         setModel(location.state.model)
         setDuration(location.state.duration)
         setRoad(location.state.road)
+        console.log('in get info');
+        console.log(model);
 
-        if (location.state.model === "conditions") {
+        if (location.state.model === "Conditions") {
             setTitle("Running Road Conditions")
             setReportTime(location.state.photoTime)
-        } else if (location.state.model === "tracking") {
+            console.log(reportTime);
+        } else if (location.state.model === "Tracking") {
             setTitle("Counting Vehicles")
             setReportTime(location.state.reportTime)
             setDirection(location.state.direction)
