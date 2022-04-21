@@ -101,10 +101,7 @@ const Tracking = () => {
 
             //If file is video
             else if (videoTypes.includes(extension)) {
-                reader.onload = function (e) {
-                    videoSrc.src = e.target.result;
-                    videoTag.load();
-                }.bind(this);
+                videoTag.src = URL.createObjectURL(event.target.files[0]);
                 videoTag.style.display = "block";
                 imgTag.style.display = "none";
                 document.getElementById("upload-button").style.marginTop = "5px";
