@@ -1,0 +1,24 @@
+item {
+    id: 1
+    name: 'single_unit / passenger'
+}
+
+item {
+    id: 2
+    name: 'bus'
+}
+
+item {
+    id: 3
+    name: 'truck'
+}
+
+item {
+    id: 4
+    name: 'multi-unit/comercial truck'
+}
+
+item {
+    id: 5
+    name: 'mislabeled'
+}

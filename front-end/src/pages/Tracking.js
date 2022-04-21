@@ -47,9 +47,35 @@ const Tracking = () => {
         setLine(data)
     }, []);
 
+    function getTrackingCommand(){
+
+        var path = " .\\back-end\\Tracking\\";
+
+        var model = " -m " + path + "saved_model";
+
+        var label = " -l " + path + "\\four_class_label_map.pbtxt";
+
+        var savePath = " -sp " + path + "\\saves\\output.avi";
+
+        var threshold = " -t " + "0.2";
+
+        var roiPosition = " -roi " + "notImplemented"; //this will need the line thingy that dalton is making
+
+        var reportFrequency = " -rf " + reportTime; //not implemented in python script yet
+
+        var detectionDuration = " -d " + duration; //not implemented in python script yet
+
+        var command = "python" + path + "tensorflow_cumulative_object_counting.py" 
+                + model + label + savePath + threshold + roiPosition;
+
+        alert(command);
+    }
+
     // Validate and redirect to running page
     function start() {
         if (videoRef != null && validate()) {
+            getTrackingCommand()
+            /*
             navigate("/running", {
                 state:
                     {
@@ -57,6 +83,7 @@ const Tracking = () => {
                         duration: duration, direction: direction, line: line
                     }
             });
+            */
         }
 
         // Show missing field
@@ -68,12 +95,16 @@ const Tracking = () => {
     // Checks that all fields are filled in
     function validate() {
         if (duration === "" || isNaN(parseFloat(duration))) {
+            console.log("duration is empty")
             return false;
         } else if (road === "") {
+            console.log("road is empty")
             return false;
         } else if (reportTime === "" || isNaN(parseFloat(reportTime))) {
+            console.log("reportTime is empty")
             return false;
         } else if (direction === "") {
+            console.log("direction is empty")
             return false;
         } else return !(line === "");
     }
