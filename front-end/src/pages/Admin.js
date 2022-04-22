@@ -1,9 +1,3 @@
-// TODO: In new user popup, change id to int, change isAdmin to bit (0 or 1),
-// validate passwords for new users (upper and lowercase letters, number, 6 chars, etc)
-// success message for adding new user
-// increase width of the new user popup
-// move the add new user button?
-
 import React from "react";
 import "../styling/Admin.css";
 import Header from "../components/Header";
@@ -16,6 +10,7 @@ import {
   DialogTitle,
   Fab,
   FormControlLabel,
+  Grid,
   IconButton,
   Paper,
   Table,
@@ -34,12 +29,12 @@ import PasswordIcon from "@mui/icons-material/Password";
 import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import AddIcon from "@mui/icons-material/Add";
 import PersonIcon from "@mui/icons-material/Person";
+import VisibilityIcon from "@material-ui/icons/Visibility";
+import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 
 const Admin = () => {
-  const errRef = useRef();
-
   //Set states
   let [page, setPage] = React.useState(0);
   let [rowsPerPage, setRowsPerPage] = React.useState(10);
@@ -56,23 +51,14 @@ const Admin = () => {
   const [name, setName] = useState();
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
-  const [passwordCheck, setPasswordCheck] = useState();
   const [isAdmin, setIsAdmin] = useState();
 
   const [errMsg, setErrMsg] = useState();
-  const [success, setSuccess] = useState();
-  // Set state to validate email address and password when registering new user
-  const [validEmail, setValidEmail] = useState();
-  const [validPassword, setValidPassword] = useState();
-  const [validMatch, setValidMatch] = useState();
 
-  // Set state for data to populate user table
+  // Set states for data to populate user table and password dialog
   const [userData, setUserData] = useState([]);
-
-  //SHOULDN'T NEED THIS AFTER PULLING DATA FROM DB
-  function createData(id, userId, isAdmin, name, email) {
-    return { id: id, userId: userId, admin: isAdmin, name: name, email: email };
-  }
+  const [displayPassword, setDisplayPassword] = useState();
+  const [showPassword, setShowPassword] = useState(false);
 
   //Changes table's page
   function handleChangePage(event, newPage) {
@@ -102,6 +88,7 @@ const Admin = () => {
   function openPassword(ID) {
     setEditID(ID);
     setPasswordPopup(true);
+    getPassword(ID);
   }
 
   //Opens delete popup
@@ -130,106 +117,120 @@ const Admin = () => {
     setToUserPopup(false);
   }
 
-  //*******************************FUNCTIONS TO MODIFY USER DATA******************************* */
+  //****************************************FUNCTIONS TO MODIFY USER DATA**************************************** */
   //Sends reset password link
-  function resetPassword() {
-    closePopup();
-  }
+  const resetPassword = async (userID) => {
+    let changedPassword = document.getElementById("changed-password").value;
+    let changedPasswordCheck = document.getElementById(
+      "changed-password-check"
+    ).value;
+    // If both fields are not filled out
+    if (changedPassword === "" || changedPasswordCheck === "") {
+      document.getElementById("change-pass-fields").style.display = "block";
+    }
+    // If passwords do not match
+    else if (changedPassword !== changedPasswordCheck) {
+      document.getElementById("change-pass-no-match").style.display = "block";
+    }
+    // Change the password
+    else
+      try {
+        // Send request to the backend to update password
+        const response = await axios.put(
+          "/api/password/" + userID,
+          JSON.stringify({
+            Id: userID,
+            User_Name: name,
+            User_Email: email,
+            User_Password: changedPassword,
+            User_IsAdmin: 1,
+          }),
+          {
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+        closePopup();
+      } catch (error) {
+        console.log(error);
+      }
+  };
 
   //Deletes user
   const deleteUser = async (userID) => {
-    console.log("Deleting User: " + userID);
-    const response = await axios.post(
-      "/api/users/" + userID,
-      JSON.stringify({
-        Id: userID,
-        User_Name: name,
-        User_Email: email,
-        User_Password: password,
-        User_IsAdmin: 1,
-      }),
-      {
-        headers: { "Content-Type": "application/json" },
-        // withCredentials: true,
-      }
-    );
-    console.log(response.status);
-    closePopup();
-    populateTable();
+    try {
+      const response = await axios.post(
+        "/api/users/" + userID,
+        JSON.stringify({
+          Id: userID,
+          User_Name: name,
+          User_Email: email,
+          User_Password: password,
+          User_IsAdmin: 1,
+        }),
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      closePopup();
+      populateTable();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   // Changes user account status to administrator
   const changeToAdmin = async (userID) => {
-    const response = await axios.put(
-      "/api/users/" + userID,
-      JSON.stringify({
-        Id: userID,
-        User_Name: name,
-        User_Email: email,
-        User_Password: password,
-        User_IsAdmin: 1,
-      }),
-      {
-        headers: { "Content-Type": "application/json" },
-        // withCredentials: true,
-      }
-    );
-    console.log(response.status);
-    closePopup();
-    populateTable();
+    try {
+      const response = await axios.put(
+        "/api/users/" + userID,
+        JSON.stringify({
+          Id: userID,
+          User_Name: name,
+          User_Email: email,
+          User_Password: password,
+          User_IsAdmin: 1,
+        }),
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      closePopup();
+      populateTable();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   //Changes account status to normal user
   const changeToUser = async (userID) => {
-    const response = await axios.put(
-      "/api/users/" + userID,
-      JSON.stringify({
-        Id: userID,
-        User_Name: name,
-        User_Email: email,
-        User_Password: password,
-        User_IsAdmin: 0,
-      }),
-      {
-        headers: { "Content-Type": "application/json" },
-        // withCredentials: true,
-      }
-    );
-    console.log(response.status);
-    closePopup();
-    populateTable();
+    try {
+      const response = await axios.put(
+        "/api/users/" + userID,
+        JSON.stringify({
+          Id: userID,
+          User_Name: name,
+          User_Email: email,
+          User_Password: password,
+          User_IsAdmin: 0,
+        }),
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      closePopup();
+      populateTable();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
-  //*******************************FUNCTIONS TO VALIDATE NEW USER DATA******************************* */
-  // // Validate email and password when registering new user
-  // const EMAIL_REGEX = "[a-z0-9]+@ndsu.edu";
-  // const PASSWORD_REGEX = "/^(?-.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{4,24}$/";
-
-  // useEffect(() => {
-  //   const result = EMAIL_REGEX.test(email);
-  //   console.log(result);
-  //   console.user(email);
-  //   setValidEmail(result);
-  // }, [email]);
-
-  // useEffect(() => {
-  //   const result = PASSWORD_REGEX.test(password);
-  //   console.log(result);
-  //   console.user(password);
-  //   setValidPassword(result);
-  //   // const match = password === passwordCheck
-  //   // setValidMatch(match);
-  // }, [password]);
-
-  // useEffect(() => {
-  //   setErrMsg("");
-  // }, [email, password, passwordCheck]);
-
+  //****************************************FUNCTIONS TO RETRIEVE AND DISPLAY USER DATA**************************************** */
+  // Get all users for user table
   const populateTable = async () => {
     try {
       const response = await axios.get("/api/users");
       setUserData(response.data);
-      // clear user fields to allow for proper register user functionality
+      // clear user states to allow for proper register user functionality
       setUserId();
       setName("");
       setEmail("");
@@ -239,26 +240,64 @@ const Admin = () => {
     }
   };
 
+  // Populate table when page initially loads
   useEffect(() => {
     populateTable();
   }, []);
 
-  // Convert string true/false to boolean value
+  // Function to retrieve a user's current password (displayed in change password popup)
+  const getPassword = async (userID) => {
+    setShowPassword(false);
+    userID = parseInt(userID);
+    try {
+      let response = await axios.post(
+        "/api/password/" + userID,
+        JSON.stringify({
+          Id: userID,
+          User_Name: name,
+          User_Email: email,
+          User_Password: password,
+          User_IsAdmin: 0,
+        }),
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      let currentPassword = response.data[0].User_Password;
+      setDisplayPassword(currentPassword);
+      return displayPassword;
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // Function to change visibility of current password in the change password popup
+  const passVisibility = () => {
+    if (showPassword === true) {
+      setShowPassword(false);
+    } else if (showPassword === false) {
+      setShowPassword(true);
+    }
+  };
+
+  //****************************************FUNCTIONS REQUIRED TO REGISTER A NEW USER*************************************** */
+
+  // Convert string true/false to boolean value to allow proper format for database User_IsAdmin attribute
   const convertToBoolean = (value) => {
     if (value === true) return 1;
     if (value === false) return 0;
     return value;
   };
 
-  //Register a new user
+  // Submit Register New User Form
   const newUserSubmit = async (e) => {
+    e.preventDefault();
+
     let userId = document.getElementById("new-id").value;
     let password = document.getElementById("new-password").value;
     let passwordCheck = document.getElementById("new-password-check").value;
     let email = document.getElementById("new-email").value;
     let name = document.getElementById("new-name").value;
-
-    e.preventDefault();
 
     //If all fields are not filled out
     if (
@@ -270,18 +309,15 @@ const Admin = () => {
     ) {
       document.getElementById("new-user-fields").style.display = "block";
     }
-
     //If passwords do not match
     else if (password !== passwordCheck) {
       document.getElementById("new-user-fields").style.display = "none";
       document.getElementById("new-pass-no-match").style.display = "block";
     }
-
     // Add the new user
     else {
       try {
         userId = parseInt(userId);
-
         const response = await axios.post(
           "/api/users",
           JSON.stringify({
@@ -293,14 +329,8 @@ const Admin = () => {
           }),
           {
             headers: { "Content-Type": "application/json" },
-            // withCredentials: true,
           }
         );
-        console.log(response.data);
-        // console.log(response.accessToken);
-        console.log(JSON.stringify(response));
-        setSuccess(true);
-        // could also set user states back to empty strings here to clear input fields if you want
       } catch (error) {
         if (error.response?.status === 409) {
           setErrMsg("User already exists");
@@ -308,27 +338,12 @@ const Admin = () => {
           setErrMsg("Registration failed");
         }
       }
-      // console.log(
-      //   "NEW USER: User ID: " +
-      //     userId +
-      //     ", Name: " +
-      //     name +
-      //     ", Email: " +
-      //     email +
-      //     ", Password: " +
-      //     passwordCheck +
-      //     ", Administrator:  " +
-      //     isAdmin
-      // );
       closePopup();
       populateTable();
     }
   };
 
-  // const rows = [
-  //   createData(1, 1111, true, "Annika Hansen", "email@email.com"),
-  //   createData(2, 2222, false, "Agnes Jurati", "email@email.com"),
-  // ];
+  // Array to hold list of users retrieved from DB
   const rows = [...userData];
 
   const adminIcon = (
@@ -457,69 +472,127 @@ const Admin = () => {
       </Dialog>
 
       {/* Password popup */}
-      <Dialog open={passwordPopup} onClose={closePopup}>
+      <Dialog fullWidth maxWidth="xs" open={passwordPopup} onClose={closePopup}>
         <DialogTitle>Reset Password</DialogTitle>
         <DialogContent>
-          <Typography variant="body1">
-            Are you sure you want to send the reset password link to this user?
+          <Grid container alignItems="center">
+            <Grid item xs={5}>
+              <Typography variant="body1" id="current-password-label">
+                Current Password:
+              </Typography>
+            </Grid>
+
+            <Grid item xs={6}>
+              {showPassword ? (
+                <Typography id="visible-password">{displayPassword}</Typography>
+              ) : (
+                <Typography id="hidden-password">{displayPassword}</Typography>
+              )}
+            </Grid>
+            <Grid item xs={1}>
+              <IconButton onClick={passVisibility}>
+                {showPassword ? (
+                  <Tooltip title="Hide password">
+                    <VisibilityOffIcon />
+                  </Tooltip>
+                ) : (
+                  <Tooltip title="Show password">
+                    <VisibilityIcon />
+                  </Tooltip>
+                )}
+              </IconButton>
+            </Grid>
+          </Grid>
+          <br />
+          <TextField
+            className="inputField"
+            id="changed-password"
+            label="New Password"
+            type="password"
+            variant="outlined"
+            style={{ marginBottom: "15px" }}
+            required
+          />
+          <br />
+          <TextField
+            className="inputField"
+            id="changed-password-check"
+            label="Re-Enter New Password"
+            type="password"
+            variant="outlined"
+            required
+          />
+          <Typography
+            id="change-pass-fields"
+            style={{ display: "none", color: "red" }}
+            variant="body1"
+          >
+            Please fill out all fields.
+          </Typography>
+          <Typography
+            id="change-pass-no-match"
+            style={{ display: "none", color: "red" }}
+            variant="body1"
+          >
+            Passwords do not match.
           </Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={closePopup}>Cancel</Button>
-          <Button onClick={resetPassword}>Send</Button>
+          <Button onClick={() => resetPassword(editID)}>Reset</Button>
         </DialogActions>
       </Dialog>
 
       {/* New user popup */}
-      <Dialog open={newUserPopup} onClose={closePopup}>
+      <Dialog fullWidth maxWidth="xs" open={newUserPopup} onClose={closePopup}>
         <DialogTitle>New User</DialogTitle>
         <DialogContent>
           <TextField
+            className="inputField"
             id="new-id"
             label="User ID"
             type="text"
             variant="outlined"
             style={{ marginBottom: "15px" }}
-            // onChange={(e) => setUserId(e.target.value)}
             required
           />
           <br />
           <TextField
+            className="inputField"
             id="new-name"
             label="Name"
             type="text"
             variant="outlined"
             style={{ marginBottom: "15px" }}
-            // onChange={(e) => setName(e.target.value)}
             required
           />
           <br />
           <TextField
+            className="inputField"
             id="new-email"
             label="Email"
             type="email"
             variant="outlined"
             style={{ marginBottom: "15px" }}
-            // onChange={(e) => setEmail(e.target.value)}
             required
           />
           <br />
           <TextField
+            className="inputField"
             id="new-password"
             label="Password"
             type="password"
             variant="outlined"
             style={{ marginBottom: "15px" }}
-            // onChange={(e) => setPassword(e.target.value)}
             required
           />
           <br />
           <TextField
+            className="inputField"
             id="new-password-check"
             label="Re-Enter Password"
             type="password"
             variant="outlined"
-            // onChange={(e) => setPasswordCheck(e.target.value)}
             required
           />
           <br />
@@ -534,9 +607,6 @@ const Admin = () => {
             label="Administrator"
           />
           <br />
-          {/* <p ref={errRef} className={errMsg ? "errmsg" : "none"}>
-            {errMsg}
-          </p> */}
           <Typography
             id="new-pass-no-match"
             style={{ display: "none", color: "red" }}
