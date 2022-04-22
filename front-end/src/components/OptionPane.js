@@ -1,8 +1,4 @@
-// TODO: 1) Move styling from OptionPane.css to TrackingAndCondtions.css when integrating with Vincent's part
-//       2) Disable radio buttons with Start onClick, re-enable with Quit onClick
-//       3) reset radio button values with Cancel onClick, set Custom textfields to required if Custom radio button is selected
 import "../styling/TrackingAndConditions.css";
-import "./OptionPane.css";
 import {
   FormControl,
   FormControlLabel,

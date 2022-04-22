@@ -1,4 +1,3 @@
-// TODO: Conditionally render OptionPane if Connect to camera is selected
 import "../styling/TrackingAndConditions.css";
 import Header from "../components/Header";
 import Subheader from "../components/Subheader";
@@ -30,6 +29,9 @@ const ROAD_CONDITIONS = {
 const roadLabels = ["Clear", "Ice", "Snow", "Partial Snow", "Wet"];
 
 const Conditions = () => {
+  const showAdminOption = localStorage.getItem("admin");
+  const accessToken = localStorage.getItem("token");
+
   const [showWebcam, setShowWebcam] = useState(false);
   //Compatible file types
   const imageTypes = ["jpg", "jpeg", "png"];
@@ -132,10 +134,10 @@ const Conditions = () => {
 
   return (
     <div className="container">
-      <Header />
+      <Header admin={showAdminOption} />
       <main id="mainContent">
         <Grid container>
-          <Grid item xs={0} lg={1}>
+          <Grid item lg={1}>
             {/* spacer */}
           </Grid>
           <Grid item xs={12} lg={10}>
@@ -248,7 +250,7 @@ const Conditions = () => {
             <OptionPane />
             <ButtonGroup />
           </Grid>
-          <Grid item xs={0} lg={1}>
+          <Grid item lg={1}>
             {/* spacer */}
           </Grid>
         </Grid>
