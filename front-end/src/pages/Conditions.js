@@ -29,7 +29,6 @@ const Conditions = () => {
     const [duration, setDuration] = useState("")
     const navigate = useNavigate();
     const location = useLocation();
-    const canvasRef = useRef(null);
     //Compatible file types
     const imageTypes = ["jpg", "jpeg", "png"];
     const videoTypes = ["mp4", "mkv", "wmv", "mov"];
@@ -79,14 +78,6 @@ const Conditions = () => {
         } else return !(duration === "" || isNaN(parseFloat(duration)));
     }
 
-    function alignCanvas() {
-        let rect = videoRef.current.getBoundingClientRect();
-        let ref = canvasRef.current;
-
-        ref.width = rect.width;
-        ref.height = rect.height;
-        ref.className = "canvas";
-    }
 
     //Called when file is uploaded
     function upload(event) {
@@ -314,7 +305,6 @@ const Conditions = () => {
                                             >
                                                 Your browser does not support HTML5 video.
                                             </video>
-                                            <canvas className="canvas" ref={canvasRef}/>
                                             <img
                                                 src="splashImage"
                                                 id="imagePreview"
