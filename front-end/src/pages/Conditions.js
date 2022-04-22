@@ -40,7 +40,6 @@ const Conditions = () => {
         2: "Partial Snow",
         3: "Snow",
         4: "Wet"
-
     };
 
     var csvOutput = [['Date', 'Time', 'Condition'],];
@@ -91,7 +90,6 @@ const Conditions = () => {
 
     //Called when file is uploaded
     function upload(event) {
-        let videoSrc = document.getElementById("video-source");
         let videoTag = document.getElementById("videoPreview");
         let imgTag = document.getElementById("imagePreview");
 
@@ -108,19 +106,37 @@ const Conditions = () => {
                 imgTag.style.display = "block";
                 videoTag.style.display = "none";
                 document.getElementById("upload-button").style.marginTop = "5px";
-                runConditionsModel(imgTag);
+
+                //const model = load_model();
+                //alert(model.summary());
+                runConditionsModel(imgTag).then(function (e) {
+                    // Show export button
+                    document.getElementById("export-button").style.display = "block";
+                    // Display prediction
+                    alert("Prediction: " + e)
+                });
+
             }
 
             //If file is video
             else if (videoTypes.includes(extension)) {
-                reader.onload = function (e) {
-                    videoSrc.src = e.target.result;
-                    videoTag.load();
-                }.bind(this);
+                videoTag.src = URL.createObjectURL(event.target.files[0]);
+
+                // Update UI
+                videoTag.style.display = "none";
+                document.getElementById("upload-button").style.marginTop = "100px";
+                document.getElementById("export-button").style.display = "none";
+                imgTag.style.display = "none";
+
+                // Run model on video
+                runConditionsOnVideo(videoTag)
+
+                // Update UI again
                 videoTag.style.display = "block";
                 imgTag.style.display = "none";
                 document.getElementById("upload-button").style.marginTop = "5px";
-                //var myInterval = setInterval(runConditionsModel, 1000, imgTag);
+
+                document.getElementById("export-button").style.display = "block";
             }
 
             //Incompatible type
@@ -134,23 +150,24 @@ const Conditions = () => {
         }
     }
 
+    // Run conditions model on uploaded video
+    function runConditionsOnVideo(video) {
+        // TODO
+    }
+
     function getTime() {
         const hour = new Date().getHours();
         const minute = new Date().getMinutes();
         const second = new Date().getSeconds();
-
-        const time = hour + ":" + minute + ":" + second;
-
-        return time;
+        return hour + ":" + minute + ":" + second;
     }
 
     function getDate() {
         const day = new Date().getDate();
         const year = new Date().getFullYear();
-        const month = new Date().getMonth() + 1;
-        const date = month + '/' + day + '/' + year;
 
-        return date;
+        const month = new Date().getMonth() + 1;
+        return month + '/' + day + '/' + year;
     }
 
     function download_csv() {
@@ -168,23 +185,8 @@ const Conditions = () => {
         hiddenElm.click();
     }
 
-    function getImage() {
-        const canvas = document.createElement("canvas");
-        const video = videoRef.current;
 
-        // Scale the canvas
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-
-        // Draw video frame on canvas
-        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-        const dataURL = canvas.toDataURL();
-        let image = document.createElement("img");
-        image.src = dataURL;
-        return image;
-    }
-
-    // Runs the conditions model on webcam image
+    // Runs the conditions model on image
     async function runConditionsModel(image) {
         const model = await getConditionsModel();
 
@@ -217,10 +219,8 @@ const Conditions = () => {
         //Pushing the output to the csvOutput array
         csvOutput.push([getDate(), getTime(), top5[0].className]);
 
-        // Show export button
-        document.getElementById("export-button").style.display = "block";
-
-        alert("Prediction: " + top5[0].className)
+        // Return prediction
+        return top5[0].className;
     }
 
     // Show webcam video
@@ -312,7 +312,6 @@ const Conditions = () => {
                                                     maxHeight: "300px",
                                                 }}
                                             >
-                                                <source id="video-source" src="splashVideo"/>
                                                 Your browser does not support HTML5 video.
                                             </video>
                                             <canvas className="canvas" ref={canvasRef}/>
@@ -338,7 +337,8 @@ const Conditions = () => {
                                                     value={""}
                                                     style={{display: "none"}}
                                                 />
-                                                <Grid container columnSpacing={{xs: 1, sm: 2, md: 3}} justifyContent={"center"}>
+                                                <Grid container columnSpacing={{xs: 1, sm: 2, md: 3}}
+                                                      justifyContent={"center"}>
                                                     <Grid item>
                                                         <Button
                                                             id="upload-button"
