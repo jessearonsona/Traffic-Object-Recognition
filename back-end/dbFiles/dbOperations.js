@@ -9,7 +9,7 @@ const getUsers = async () => {
     let users = await pool
       .request()
       .query("SELECT * FROM User_Details ORDER BY User_Name");
-    console.log(users);
+
     return users;
   } catch (error) {
     console.log(error);
@@ -18,9 +18,9 @@ const getUsers = async () => {
 
 // Function to add a new user to the database
 const addUser = async (user) => {
-  //Hash passwords
-  const salt = await bcrypt.genSalt(10);
-  const hashPassword = await bcrypt.hash(user.User_Password, salt);
+  // // Hash passwords
+  // const salt = await bcrypt.genSalt(10);
+  // const hashPassword = await bcrypt.hash(user.User_Password, salt);
   try {
     let pool = await sql.connect(dbConfig);
     let insertUser = await pool
@@ -33,12 +33,12 @@ const addUser = async (user) => {
           "','" +
           user.User_Email +
           "','" +
-          hashPassword +
+          user.User_Password +
           "'," +
           user.User_IsAdmin +
           ", getdate(), getdate())"
       );
-    // console.log(insertUser);
+
     return insertUser;
   } catch (error) {
     console.log(error);
@@ -46,24 +46,20 @@ const addUser = async (user) => {
 };
 
 // Function to log user in
-const loginUser = async (user) => {
+const loginUser = async (email, password) => {
   try {
     let pool = await sql.connect(dbConfig);
-    let authUser = await pool
+    let foundUser = await pool
       .request()
       .query(
-        "SELECT * FROM User_Details WHERE User_Email = " + user.User_Email
+        "SELECT * FROM User_Details WHERE User_Email ='" +
+          email +
+          "' and User_Password = '" +
+          password +
+          "'"
       );
 
-    // decrypt password and attempt to match (!!!!!!!!!!!!!!!!!!!!!!!!THIS CODE IS A BIT OF A GUESS!!!!!!!!!!!!!!!!!!!!!!!!)
-    const validPassword = await bcrypt.compare(
-      user.User_Password,
-      authUser[0].User_Password
-    );
-    console.log(authUser);
-    if (validPassword) {
-      return authUser;
-    }
+    return foundUser;
   } catch (error) {
     console.log(error);
   }
@@ -81,8 +77,41 @@ const changeAdminStatus = async (user) => {
           " WHERE Id = " +
           user.Id
       );
-    console.log(updatedUser);
     return updatedUser;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+// Function to change a user to admin status
+const changePassword = async (user) => {
+  //Hash password
+  // const salt = await bcrypt.genSalt(10);
+  // const hashPassword = await bcrypt.hash(user.User_Password, salt);
+  try {
+    let pool = await sql.connect(dbConfig);
+    let updatedUser = await pool
+      .request()
+      .query(
+        "UPDATE User_Details SET User_Password= '" +
+          user.User_Password +
+          "' WHERE Id = " +
+          user.Id
+      );
+    return updatedUser;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+// Function to get user password from the database to display on Admin Page
+const getPassword = async (user) => {
+  try {
+    let pool = await sql.connect(dbConfig);
+    let currentPassword = await pool
+      .request()
+      .query("SELECT User_Password FROM User_Details WHERE Id = " + user.Id);
+    return currentPassword;
   } catch (error) {
     console.log(error);
   }
@@ -101,10 +130,24 @@ const deleteUser = async (user) => {
   }
 };
 
+// Function to get entire user list from the database
+const getRoads = async () => {
+  try {
+    let pool = await sql.connect(dbConfig);
+    let roads = await pool.request().query("SELECT * FROM Stations");
+    return roads;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 module.exports = {
   addUser,
   changeAdminStatus,
+  changePassword,
   deleteUser,
+  getPassword,
   getUsers,
   loginUser,
+  getRoads,
 };
