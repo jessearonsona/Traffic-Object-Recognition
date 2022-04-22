@@ -46,11 +46,11 @@ const Header = (props) => {
       <div id="headerTop">
         <img src={logo} id="headerLogo" alt="NDSU" />
         {!isLoginPage(pathname) && (
-          <div class="dropdown">
-            <IconButton id="accountIcon" class="dropbtn">
+          <div className="dropdown">
+            <IconButton id="accountIcon" className="dropbtn">
               <AccountCircleIcon fontSize="large" />
             </IconButton>
-            <div class="dropdown-content">
+            <div className="dropdown-content">
               {showAdminOption() && (
                 <a onClick={() => handleAdminRedirect()}> Admin Page </a>
               )}

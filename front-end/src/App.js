@@ -5,6 +5,7 @@ import RequireAuth from "./components/RequireAuth";
 import Login from "./pages/Login";
 import Tracking from "./pages/Tracking";
 import Conditions from "./pages/Conditions";
+import Running from "./pages/Running";
 import Admin from "./pages/Admin";
 
 const theme = createTheme({
@@ -31,6 +32,7 @@ function App() {
             <Route path="/conditions" element={<Conditions />} />
             <Route path="/admin" element={<Admin />} />
           </Route>
+        <Route path="/running/" element={<Running />} />
         </Route>
       </Routes>
     </ThemeProvider>
