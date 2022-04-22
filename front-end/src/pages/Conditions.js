@@ -6,9 +6,9 @@ import OptionPane from "../components/OptionPane";
 import { Button, Container, Grid, Input, Typography } from "@material-ui/core";
 import Webcam from "react-webcam";
 import AddIcon from "@mui/icons-material/Add";
-
 import * as tf from "@tensorflow/tfjs";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import useAuth from "../hooks/useAuth";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 
 async function load_model() {
@@ -29,8 +29,13 @@ const ROAD_CONDITIONS = {
 const roadLabels = ["Clear", "Ice", "Snow", "Partial Snow", "Wet"];
 
 const Conditions = () => {
+  const [accessToken, setAccessToken] = useState();
+
   const showAdminOption = localStorage.getItem("admin");
-  const accessToken = localStorage.getItem("token");
+
+  useEffect(() => {
+    setAccessToken(localStorage.getItem("token"));
+  }, [accessToken]);
 
   const [showWebcam, setShowWebcam] = useState(false);
   //Compatible file types
@@ -141,7 +146,7 @@ const Conditions = () => {
             {/* spacer */}
           </Grid>
           <Grid item xs={12} lg={10}>
-            <Subheader />
+            <Subheader authed={accessToken} />
             <div className="center">
               <Grid
                 container

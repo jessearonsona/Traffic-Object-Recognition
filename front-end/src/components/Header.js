@@ -2,7 +2,8 @@ import "../styling/Header.css";
 import logo from "../assets/headerLogo.png";
 import AccountCircleIcon from "@material-ui/icons/AccountCircle";
 import { IconButton, Paper } from "@material-ui/core";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 const Header = (props) => {
   const showAdminOption = () => {
@@ -13,6 +14,14 @@ const Header = (props) => {
     }
   };
 
+  const [accessToken, setAccessToken] = useState();
+
+  useEffect(() => {
+    setAccessToken(localStorage.getItem("token"));
+  }, [accessToken]);
+
+  const navigate = useNavigate();
+
   // Get current page to use for conditional rendering
   const location = useLocation();
   const pathname = location.pathname;
@@ -20,6 +29,12 @@ const Header = (props) => {
   // used for conditional rendering of user icon
   const isLoginPage = (path) => {
     return path === "/";
+  };
+
+  const handleAdminRedirect = () => {
+    if (accessToken) {
+      navigate("/admin");
+    }
   };
 
   const handleLogout = () => {
@@ -37,7 +52,7 @@ const Header = (props) => {
             </IconButton>
             <div class="dropdown-content">
               {showAdminOption() && (
-                <a href="http://localhost:3000/admin">Admin Page</a>
+                <a onClick={() => handleAdminRedirect()}> Admin Page </a>
               )}
               <a href="http://localhost:3000" onClick={handleLogout}>
                 Logout

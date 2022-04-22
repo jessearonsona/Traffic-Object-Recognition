@@ -49,12 +49,11 @@ const Login = () => {
             },
           }
         );
-        console.log(JSON.stringify(response?.data));
         const accessToken = response?.data?.accessToken;
         let validUser = response?.data;
         if (validUser) {
-          // clear email and password textfields upon successful login
           setAuth({ email, password, accessToken });
+          // clear email and password textfields upon successful login
           setEmail("");
           setPassword("");
           // store user's isAdmin property and access token in local storage

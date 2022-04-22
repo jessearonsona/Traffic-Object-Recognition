@@ -7,13 +7,14 @@ import {
   MenuItem,
   Select,
 } from "@material-ui/core";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
 import "../styling/TrackingAndConditions.css";
 
-const Subheader = () => {
+const Subheader = (props) => {
+  const navigate = useNavigate();
   // Get current page to use for conditional rendering
   const location = useLocation();
   const pathname = location.pathname;
@@ -32,6 +33,17 @@ const Subheader = () => {
       return path === "/tracking" ? "contained" : "outlined";
     } else {
       return path === "/tracking" ? "outlined" : "contained";
+    }
+  };
+
+  // Function to toggle between vehicle tracking and road conditions pages
+  const changePage = (authed, id) => {
+    if (authed) {
+      if (id === "VTBtn") {
+        navigate("/tracking");
+      } else {
+        navigate("/conditions");
+      }
     }
   };
 
@@ -60,19 +72,21 @@ const Subheader = () => {
           <ButtonGroup>
             <Button
               id="VTBtn"
-              href="/tracking"
+              // href="/tracking"
               variant={setBtnVariant(pathname, "VTBtn")}
               size="large"
               color="primary"
+              onClick={() => changePage(props.authed, "VTBtn")}
             >
               Vehicle Tracking
             </Button>
             <Button
               id="RCBtn"
-              href="/conditions"
+              // href="/conditions"
               variant={setBtnVariant(pathname, "RCBtn")}
               size="large"
               color="primary"
+              onClick={() => changePage(props.authed, "RCBtn")}
             >
               Road Conditions
             </Button>

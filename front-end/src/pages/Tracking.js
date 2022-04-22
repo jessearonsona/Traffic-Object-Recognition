@@ -56,8 +56,6 @@ let classesDir = {
   },
 };
 
-const showAdminOption = localStorage.getItem("admin");
-
 class Tracking extends React.Component {
   constructor(props) {
     super(props);
@@ -69,6 +67,8 @@ class Tracking extends React.Component {
 
     this.state = {
       showWebcam: false,
+      accessToken: localStorage.getItem("token"),
+      showAdminOption: localStorage.getItem("admin"),
     };
   }
 
@@ -274,14 +274,14 @@ class Tracking extends React.Component {
   render = () => {
     return (
       <div className="container">
-        <Header admin={showAdminOption} />
+        <Header admin={this.state.showAdminOption} />
         <main id="mainContent">
           <Grid container>
             <Grid item xs={0} lg={1}>
               {/* spacer */}
             </Grid>
             <Grid item xs={12} lg={10}>
-              <Subheader />
+              <Subheader authed={this.state.accessToken} />
               <div className="center">
                 <Grid
                   container
