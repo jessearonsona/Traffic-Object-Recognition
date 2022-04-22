@@ -61,9 +61,9 @@ const Tracking = () => {
 
         var roiPosition = " -roi " + "notImplemented"; //this will need the line thingy that dalton is making
 
-        var reportFrequency = " -rf " + reportTime; //not implemented in python script yet
+        var reportFrequency = " -rf " + reportTime;
 
-        var detectionDuration = " -d " + duration; //not implemented in python script yet
+        var detectionDuration = " -d " + duration;
 
         var command = "python" + path + "tensorflow_cumulative_object_counting.py" 
                 + model + label + savePath + threshold + roiPosition;
