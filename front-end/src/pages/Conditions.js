@@ -29,6 +29,7 @@ const Conditions = () => {
     const [duration, setDuration] = useState("")
     const navigate = useNavigate();
     const location = useLocation();
+    const canvasRef = useRef(null);
     //Compatible file types
     const imageTypes = ["jpg", "jpeg", "png"];
     const videoTypes = ["mp4", "mkv", "wmv", "mov"];
@@ -78,6 +79,15 @@ const Conditions = () => {
         } else return !(duration === "" || isNaN(parseFloat(duration)));
     }
 
+    function alignCanvas() {
+        let rect = videoRef.current.getBoundingClientRect();
+        let ref = canvasRef.current;
+
+        ref.width = rect.width;
+        ref.height = rect.height;
+        ref.className = "canvas";
+    }
+
     //Called when file is uploaded
     function upload(event) {
         let videoTag = document.getElementById("videoPreview");
@@ -96,6 +106,7 @@ const Conditions = () => {
                 imgTag.style.display = "block";
                 videoTag.style.display = "none";
                 document.getElementById("upload-button").style.marginTop = "5px";
+
                 //const model = load_model();
                 //alert(model.summary());
                 runConditionsModel(imgTag).then(function (e) {
@@ -104,6 +115,7 @@ const Conditions = () => {
                     // Display prediction
                     alert("Prediction: " + e)
                 });
+
             }
 
             //If file is video
@@ -123,6 +135,7 @@ const Conditions = () => {
                 videoTag.style.display = "block";
                 imgTag.style.display = "none";
                 document.getElementById("upload-button").style.marginTop = "5px";
+
                 document.getElementById("export-button").style.display = "block";
             }
 
@@ -152,8 +165,9 @@ const Conditions = () => {
     function getDate() {
         const day = new Date().getDate();
         const year = new Date().getFullYear();
-        const month = new Date().getMonth();
-        return day + '/' + month + '/' + year;
+
+        const month = new Date().getMonth() + 1;
+        return month + '/' + day + '/' + year;
     }
 
     function download_csv() {
@@ -170,6 +184,7 @@ const Conditions = () => {
         hiddenElm.download = 'Condition Report.csv';
         hiddenElm.click();
     }
+
 
     // Runs the conditions model on image
     async function runConditionsModel(image) {
@@ -193,7 +208,6 @@ const Conditions = () => {
                     className: ROAD_CONDITIONS[i] // we are selecting the value from the obj
                 };
             }).sort(function (a, b) {
-                // console.log("b: " + b + b.probability)
                 return b.probability - a.probability;
             }).slice(0, 5); //Determines how many of the top results it shows
 
@@ -202,10 +216,8 @@ const Conditions = () => {
             output += `${p.className}: ${p.probability.toFixed(6)}\n`; //probability is not probability atm. Need to fix
         });
 
-        //console.log(top5); //showing our current prediction. This is what we need.
-        console.log(top5[0].className);
+        //Pushing the output to the csvOutput array
         csvOutput.push([getDate(), getTime(), top5[0].className]);
-        console.log(csvOutput);
 
         // Return prediction
         return top5[0].className;
@@ -302,6 +314,7 @@ const Conditions = () => {
                                             >
                                                 Your browser does not support HTML5 video.
                                             </video>
+                                            <canvas className="canvas" ref={canvasRef}/>
                                             <img
                                                 src="splashImage"
                                                 id="imagePreview"

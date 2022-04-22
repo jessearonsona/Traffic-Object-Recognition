@@ -82,24 +82,21 @@ const Running = () => {
                 setTime((prevTime) => prevTime + 1000);
             }, 1000);
 
-            let hour = Math.floor((parseFloat(time) / 3600000) % 60)
+            let stopTime = Math.round(duration * 3600000);
 
-            if (hour === parseFloat(duration)) {
+            if(time % stopTime === 0 && time != 0){
                 stop()
             }
 
-            let min = Math.floor((parseFloat(time) / 60000) % 60)
-            let sec = (time / 1000) % 60
-
             // If running conditions and time to run model
-            console.log(min + " " +  reportTime);
-            if (model === "Conditions" && ((sec === 0 && min % reportTime === 0))) {
+            let testTime = reportTime * 60000;
+            if( model === "Conditions" && time % testTime === 0) {
                 runConditionsModel()
             }
 
             // If running tracking and time to send report
-            if (model === "Tracking" && ((sec === 0 && min % reportTime === 0) || TESTING)) {
-                // TODO
+            if( model === "Tracking" && time % testTime === 0) {
+                runConditionsModel()
             }
 
             return () => clearInterval(interval);
@@ -111,13 +108,10 @@ const Running = () => {
         setModel(location.state.model)
         setDuration(location.state.duration)
         setRoad(location.state.road)
-        console.log('in get info');
-        console.log(model);
 
         if (location.state.model === "Conditions") {
             setTitle("Running Road Conditions")
             setReportTime(location.state.photoTime)
-            console.log(reportTime);
         } else if (location.state.model === "Tracking") {
             setTitle("Counting Vehicles")
             setReportTime(location.state.reportTime)
@@ -178,7 +172,6 @@ const Running = () => {
     // Finalize report info, stop video, and redirect
     function stop() {
         setTimer(false)
-        console.log("in stop");
         download_csv();
         // Stop webcam
         let video = videoRef.current.srcObject;
@@ -250,8 +243,8 @@ const Running = () => {
     function getDate() {
         const day = new Date().getDate();
         const year = new Date().getFullYear();
-        const month = new Date().getMonth();
-        const date = day + '/' + month + '/' + year;
+        const month = new Date().getMonth() + 1;
+        const date = month + '/' + day + '/' + year;
         
         return date;
     }
@@ -297,9 +290,7 @@ const Running = () => {
                 return b.probability - a.probability;
             }).slice(0, 5); //Determines how many of the top results it shows
 
-        //console.log(top5); //showing our current prediction. This is what we need.
-        console.log(top5[0].className);
-        // Appending the prediction onto the 
+        // Appending the prediction onto the report
         csvOutput.push([getDate(), getTime(), top5[0].className]);
 
         // Display report info on page
