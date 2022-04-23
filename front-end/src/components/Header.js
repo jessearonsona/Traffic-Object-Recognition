@@ -1,8 +1,8 @@
 import "../styling/Header.css";
 import logo from "../assets/headerLogo.png";
 import AccountCircleIcon from "@material-ui/icons/AccountCircle";
-import { IconButton, Paper } from "@material-ui/core";
-import { useLocation, useNavigate } from "react-router-dom";
+import { IconButton } from "@material-ui/core";
+import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 const Header = (props) => {
@@ -22,15 +22,6 @@ const Header = (props) => {
 
   const navigate = useNavigate();
 
-  // Get current page to use for conditional rendering
-  const location = useLocation();
-  const pathname = location.pathname;
-
-  // used for conditional rendering of user icon
-  const isLoginPage = (path) => {
-    return path === "/";
-  };
-
   const handleAdminRedirect = () => {
     if (accessToken) {
       navigate("/admin");
@@ -47,7 +38,7 @@ const Header = (props) => {
         <img src={logo} id="headerLogo" alt="NDSU" />
         <div id="headerBottom">
           Upper Great Plains Transportation Institute
-          {!isLoginPage(pathname) && (
+          {accessToken && (
             <div className="dropdown">
               <div className="move_right">
                 <IconButton id="accountIcon" className="dropbtn">
