@@ -1,11 +1,11 @@
-// TODO: Conditionally render OptionPane if Connect to camera is selected
 import "../styling/TrackingAndConditions.css";
 import Header from "../components/Header";
 import Subheader from "../components/Subheader";
 import OptionPane from "../components/OptionPane";
 import {Button, Container, Grid, IconButton, Input, Tooltip, Typography} from "@material-ui/core";
 import AddIcon from "@mui/icons-material/Add";
-import React, {useCallback, useRef, useState} from "react";
+
+import React, {useCallback, useRef, useState, useEffect} from "react";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import {useLocation, useNavigate} from "react-router-dom";
 import * as tf from "@tensorflow/tfjs";
@@ -21,6 +21,14 @@ async function getConditionsModel() {
 }
 
 const Conditions = () => {
+    const [accessToken, setAccessToken] = useState();
+
+    const showAdminOption = localStorage.getItem("admin");
+
+    useEffect(() => {
+      setAccessToken(localStorage.getItem("token"));
+    }, [accessToken]);
+  
     // Initialize states
     const [showWebcam, setShowWebcam] = useState(false);
     const videoRef = useRef(null);
@@ -231,14 +239,14 @@ const Conditions = () => {
 
     return (
         <div className="container">
-            <Header/>
+            <Header admin={showAdminOption}/>
             <main id="mainContent">
                 <Grid container>
-                    <Grid item xs={0} lg={1}>
+                    <Grid item lg={1}>
                         {/* spacer */}
                     </Grid>
                     <Grid item xs={12} lg={10}>
-                        <Subheader getRoad={getRoad}/>
+                        <Subheader getRoad={getRoad} authed={accessToken}/>
                         <div className="center">
                             <Grid
                                 container
@@ -374,7 +382,7 @@ const Conditions = () => {
                             </Button>
                         </div>
                     </Grid>
-                    <Grid item xs={0} lg={1}>
+                    <Grid item lg={1}>
                         {/* spacer */}
                     </Grid>
                 </Grid>

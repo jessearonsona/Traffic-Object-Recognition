@@ -1,5 +1,3 @@
-// TODO: Move styling from Subheader.css to TrackingAndCondtions.css when integrating with
-// Vincent's part, remove code blocks used for testing
 import {
   Button,
   ButtonGroup,
@@ -8,23 +6,27 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  Typography,
 } from "@material-ui/core";
-import { useLocation } from "react-router-dom";
-import { useState } from "react";
-import roads from "../arrays/roads";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import axios from "axios";
+
 import "../styling/TrackingAndConditions.css";
-import "./Subheader.css";
 
 const Subheader = (props) => {
+  const navigate = useNavigate();
+
   // Get current page to use for conditional rendering
   const location = useLocation();
   const pathname = location.pathname;
 
+  // Set states for roads array to populate road/intersection dropdown
+  const [roadData, setRoadData] = useState([]);
+
   // Get selection from roads dropdown
   const [value, setValue] = useState("");
 
-  // Function to change the variant of the page selector buttons depending on which
+  // Function to change the look of the page selector buttons depending on which
   // page is currently selected
   const setBtnVariant = (path, id) => {
     if (id === "VTBtn") {
@@ -33,6 +35,35 @@ const Subheader = (props) => {
       return path === "/tracking" ? "outlined" : "contained";
     }
   };
+
+  // Function to toggle between vehicle tracking and road conditions pages
+  const changePage = (authed, id) => {
+    if (authed) {
+      if (id === "VTBtn") {
+        navigate("/tracking");
+      } else {
+        navigate("/conditions");
+      }
+    }
+  };
+
+  // Get all roads/intersections where cameras are located
+  const populateRoadDropdown = async () => {
+    try {
+      const response = await axios.get("/api/roads");
+      setRoadData(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // Populate road dropdown when page initially loads
+  useEffect(() => {
+    populateRoadDropdown();
+  }, []);
+
+  // Array to hold list of camera stations retrieved from DB
+  const roads = [...roadData];
 
   // Send road info to parent component (conditions/tracking)
   function handleChange(e) {
@@ -47,19 +78,21 @@ const Subheader = (props) => {
           <ButtonGroup>
             <Button
               id="VTBtn"
-              href="/tracking"
+              // href="/tracking"
               variant={setBtnVariant(pathname, "VTBtn")}
               size="large"
               color="primary"
+              onClick={() => changePage(props.authed, "VTBtn")}
             >
               Vehicle Tracking
             </Button>
             <Button
               id="RCBtn"
-              href="/conditions"
+              // href="/conditions"
               variant={setBtnVariant(pathname, "RCBtn")}
               size="large"
               color="primary"
+              onClick={() => changePage(props.authed, "RCBtn")}
             >
               Road Conditions
             </Button>
@@ -78,20 +111,14 @@ const Subheader = (props) => {
             >
               {roads.map((road, index) => {
                 return (
-                  <MenuItem key={index} value={road}>
-                    {road}
+                  <MenuItem key={index} value={index}>
+                    {String(road.Station__Number)} - {road.Stations_Name}
                   </MenuItem>
                 );
               })}
             </Select>
           </FormControl>
         </Grid>
-
-        {/* -----------------!!! REMOVE AFTER TESTING !!!----------------- */}
-        {/* <Grid item xs={12}>
-          <Typography align="center">You Selected: {roads[value]}</Typography>
-        </Grid> */}
-        {/* -------------------------------------------------------------- */}
       </Grid>
     </div>
   );

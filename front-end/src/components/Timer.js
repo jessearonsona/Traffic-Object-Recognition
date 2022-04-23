@@ -1,4 +1,4 @@
-import "./Timer.css";
+import "../styling/Timer.css";
 
 const Timer = (props) => {
   return (
