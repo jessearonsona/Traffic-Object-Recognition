@@ -1,57 +1,112 @@
-// TODO: Conditionally render OptionPane if Connect to camera is selected
 import "../styling/TrackingAndConditions.css";
 import Header from "../components/Header";
 import Subheader from "../components/Subheader";
-import ButtonGroup from "../components/ButtonsGroup";
 import OptionPane from "../components/OptionPane";
-import { Button, Container, Grid, Input, Typography } from "@material-ui/core";
-import Webcam from "react-webcam";
+import {
+  Button,
+  Container,
+  Grid,
+  IconButton,
+  Input,
+  Tooltip,
+  Typography,
+} from "@material-ui/core";
 import AddIcon from "@mui/icons-material/Add";
 
-import * as tf from "@tensorflow/tfjs";
-
-
-//these 2 lines were put before "const Conditions = () =>" line
-import { useState } from "react";
+import React, { useCallback, useRef, useState, useEffect } from "react";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
+import { useLocation, useNavigate } from "react-router-dom";
+import * as tf from "@tensorflow/tfjs";
+import IosShareIcon from "@mui/icons-material/IosShare";
 
-async function load_model() {
-  // It's possible to load the model locally or from a repo
-  // You can choose whatever IP and PORT you want in the "http://127.0.0.1:8080/model.json" just set it before in your https server
-  const model = await tf.loadGraphModel("http://127.0.0.1:8080/model.json");
-  return model;
+// It's possible to load the model locally or from a repo
+// You can choose whatever IP and PORT you want in the "http://127.0.0.1:8080/model.json" just set it
+// before in your https server
+
+// Get road conditions model
+async function getConditionsModel() {
+  return await tf.loadGraphModel("http://127.0.0.1:8080/model.json");
 }
 
-const ROAD_CONDITIONS = {
-  0: "Clear",
-  1: "Ice",
-  2: "Partial Snow",
-  3: "Snow",
-  4: "Wet"
-
-};
-
-const roadLabels = ['Clear', 'Ice', "Snow", "Partial Snow", "Wet"];
-
-
-
 const Conditions = () => {
+  const [accessToken, setAccessToken] = useState();
+
+  const showAdminOption = localStorage.getItem("admin");
+
+  useEffect(() => {
+    setAccessToken(localStorage.getItem("token"));
+  }, [accessToken]);
+
+  // Initialize states
   const [showWebcam, setShowWebcam] = useState(false);
+  const videoRef = useRef(null);
+  const [road, setRoad] = useState("");
+  const [photoTime, setPhotoTime] = useState("");
+  const [duration, setDuration] = useState("");
+  const navigate = useNavigate();
+  const location = useLocation();
   //Compatible file types
   const imageTypes = ["jpg", "jpeg", "png"];
   const videoTypes = ["mp4", "mkv", "wmv", "mov"];
-  //const model = tf.loadLayersModel()
+  // Conditions
+  const ROAD_CONDITIONS = {
+    0: "Clear",
+    1: "Ice",
+    2: "Partial Snow",
+    3: "Snow",
+    4: "Wet",
+  };
+
+  var csvOutput = [["Date", "Time", "Condition"]];
+
+  // Get all info from child components
+  const getRoad = useCallback((data) => {
+    setRoad(data);
+  }, []);
+  const getPhotoTime = useCallback((data) => {
+    setPhotoTime(data);
+  }, []);
+  const getDuration = useCallback((data) => {
+    setDuration(data);
+  }, []);
+
+  // Validate and redirect to running page
+  function start() {
+    if (validate()) {
+      navigate("/running", {
+        state: {
+          model: location.pathname.substring(1),
+          road: road,
+          photoTime: photoTime,
+          duration: duration,
+        },
+      });
+    }
+
+    // Show missing field
+    else {
+      document.getElementById("missing-field").style.display = "block";
+    }
+  }
+
+  // Checks that all fields are filled in
+  function validate() {
+    if (road === "") {
+      return false;
+    } else if (photoTime === "" || isNaN(parseFloat(photoTime))) {
+      return false;
+    } else return !(duration === "" || isNaN(parseFloat(duration)));
+  }
 
   //Called when file is uploaded
   function upload(event) {
-    var videoSrc = document.getElementById("video-source");
-    var videoTag = document.getElementById("videoPreview");
-    var imgTag = document.getElementById("imagePreview");
+    let videoTag = document.getElementById("videoPreview");
+    let imgTag = document.getElementById("imagePreview");
 
     //Checks if a file is uploaded
     if (event.target.files && event.target.files[0]) {
-      var extension = event.target.files[0].name.split(".").pop().toLowerCase();
-      var reader = new FileReader();
+      let extension = event.target.files[0].name.split(".").pop().toLowerCase();
+      let reader = new FileReader();
 
       //If file is image
       if (imageTypes.includes(extension)) {
@@ -61,25 +116,41 @@ const Conditions = () => {
         imgTag.style.display = "block";
         videoTag.style.display = "none";
         document.getElementById("upload-button").style.marginTop = "5px";
+
         //const model = load_model();
         //alert(model.summary());
-        runModel(imgTag);
+        runConditionsModel(imgTag).then(function (e) {
+          // Show export button
+          document.getElementById("export-button").style.display = "block";
+          // Display prediction
+          alert("Prediction: " + e);
+        });
       }
 
       //If file is video
       else if (videoTypes.includes(extension)) {
-        reader.onload = function (e) {
-          videoSrc.src = e.target.result;
-          videoTag.load();
-        }.bind(this);
+        videoTag.src = URL.createObjectURL(event.target.files[0]);
+
+        // Update UI
+        videoTag.style.display = "none";
+        document.getElementById("upload-button").style.marginTop = "100px";
+        document.getElementById("export-button").style.display = "none";
+        imgTag.style.display = "none";
+
+        // Run model on video
+        runConditionsOnVideo(videoTag);
+
+        // Update UI again
         videoTag.style.display = "block";
         imgTag.style.display = "none";
         document.getElementById("upload-button").style.marginTop = "5px";
+
+        document.getElementById("export-button").style.display = "block";
       }
 
       //Incompatible type
       else {
-        var error = "Incompatible file type.\nCompatible file types:\n";
+        let error = "Incompatible file type.\nCompatible file types:\n";
         error += imageTypes.join(", ") + ", " + videoTypes.join(", ");
         alert(error);
       }
@@ -88,68 +159,108 @@ const Conditions = () => {
     }
   }
 
-
-
-  //runs the model on a given image
-  const runModel = async (test_image) => {
-    const model = await load_model();
-   
-    //converting the image to a formatted tensor
-    let tensor = tf.browser.fromPixels(test_image, 3)
-      .resizeNearestNeighbor([224, 224])
-      .expandDims()
-      .toFloat()
-    
-    //feeding the image in. 
-    let predictions = await model.predict(tensor).data();
-
-    const evalOutput = model.evaluate
-
-
-
-
-    console.log(predictions);
-
-    let top5 = Array.from(predictions)
-		.map(function (p, i) { // this is Array.map
-			return {
-				probability: p,
-				className: ROAD_CONDITIONS[i] // we are selecting the value from the obj
-			};
-		}).sort(function (a, b) {
-      console.log("b: " + b + b.probability)
-			return b.probability - a.probability;
-		}).slice(0, 5); //Determines how many of the top results it shows
-
-    let output = "Predcitions: ";
-    top5.forEach(function (p) {
-        output += `${p.className}: ${p.probability.toFixed(6)}\n`; //probability is not probabilty atm. Need to fix
-    });
-
-      //console.log(top5); //showing our current prediction. This is what we need. 
-      console.log(top5[0].className);
-      console.log(output);
-      console.log(predictions);
+  // Run conditions model on uploaded video
+  function runConditionsOnVideo(video) {
+    // TODO
   }
 
+  function getTime() {
+    const hour = new Date().getHours();
+    const minute = new Date().getMinutes();
+    const second = new Date().getSeconds();
+    return hour + ":" + minute + ":" + second;
+  }
 
+  function getDate() {
+    const day = new Date().getDate();
+    const year = new Date().getFullYear();
 
+    const month = new Date().getMonth() + 1;
+    return month + "/" + day + "/" + year;
+  }
 
+  function download_csv() {
+    var csv = "";
+    csvOutput.forEach(function (row) {
+      csv += row.join(",");
+      csv += "\n";
+    });
+
+    var hiddenElm = document.createElement("a");
+    hiddenElm.href = "data:text/csv;charset=utf-8," + encodeURI(csv);
+    hiddenElm.target = "_blank";
+
+    hiddenElm.download = "Condition Report.csv";
+    hiddenElm.click();
+  }
+
+  // Runs the conditions model on image
+  async function runConditionsModel(image) {
+    const model = await getConditionsModel();
+
+    //converting the image to a formatted tensor
+    let tensor = tf.browser
+      .fromPixels(image, 3)
+      .resizeNearestNeighbor([224, 224])
+      .expandDims()
+      .toFloat();
+
+    //feeding the image in.
+    let predictions = await model.predict(tensor).data();
+
+    const evalOutput = model.evaluate;
+
+    let top5 = Array.from(predictions)
+      .map(function (p, i) {
+        // this is Array.map
+        return {
+          probability: p,
+          className: ROAD_CONDITIONS[i], // we are selecting the value from the obj
+        };
+      })
+      .sort(function (a, b) {
+        return b.probability - a.probability;
+      })
+      .slice(0, 5); //Determines how many of the top results it shows
+
+    let output = "Predictions: ";
+    top5.forEach(function (p) {
+      output += `${p.className}: ${p.probability.toFixed(6)}\n`; //probability is not probability atm. Need to fix
+    });
+
+    //Pushing the output to the csvOutput array
+    csvOutput.push([getDate(), getTime(), top5[0].className]);
+
+    // Return prediction
+    return top5[0].className;
+  }
+
+  // Show webcam video
   function displayWebcam() {
-    setShowWebcam(true);
-    document.getElementById("cameraConnect").style.display = "none";
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices
+        .getUserMedia({
+          audio: false,
+          video: true,
+        })
+        .then((stream) => {
+          setShowWebcam(true);
+          document.getElementById("cameraConnect").style.display = "none";
+          videoRef.current.srcObject = stream;
+        });
+    }
   }
 
   return (
     <div className="container">
-      <Header />
+      <Header admin={showAdminOption} />
       <main id="mainContent">
         <Grid container>
-          <Grid item xs={0} lg={1}>
+          <Grid item lg={1}>
             {/* spacer */}
           </Grid>
           <Grid item xs={12} lg={10}>
-            <Subheader />
+            <Subheader getRoad={getRoad} authed={accessToken} />
             <div className="center">
               <Grid
                 container
@@ -176,11 +287,11 @@ const Conditions = () => {
                       </Button>
                     </div>
                     {showWebcam && (
-                      <Webcam
+                      <video
                         id="webcamVideo"
-                        src=""
-                        audio={false}
-                        mirrored={true}
+                        autoPlay
+                        playsInline
+                        ref={videoRef}
                       />
                     )}
                   </Container>
@@ -214,7 +325,6 @@ const Conditions = () => {
                           maxHeight: "300px",
                         }}
                       >
-                        <source id="video-source" src="splashVideo" />
                         Your browser does not support HTML5 video.
                       </video>
                       <img
@@ -239,26 +349,63 @@ const Conditions = () => {
                           value={""}
                           style={{ display: "none" }}
                         />
-                        <Button
-                          id="upload-button"
-                          variant="contained"
-                          color="primary"
-                          component="span"
-                          startIcon={<AddIcon />}
-                          style={{ margin: "5px", marginTop: "100px" }}
+                        <Grid
+                          container
+                          columnSpacing={{ xs: 1, sm: 2, md: 3 }}
+                          justifyContent={"center"}
                         >
-                          Upload
-                        </Button>
+                          <Grid item>
+                            <Button
+                              id="upload-button"
+                              variant="contained"
+                              color="primary"
+                              component="span"
+                              startIcon={<AddIcon />}
+                              style={{ margin: "5px", marginTop: "100px" }}
+                            >
+                              Upload
+                            </Button>
+                          </Grid>
+                          <Grid item>
+                            <Tooltip
+                              title="Export report to csv"
+                              style={{ display: "none" }}
+                            >
+                              <IconButton
+                                id="export-button"
+                                onClick={download_csv}
+                              >
+                                <IosShareIcon style={{ color: "#18563e" }} />
+                              </IconButton>
+                            </Tooltip>
+                          </Grid>
+                        </Grid>
                       </label>
                     </div>
                   </Container>
                 </Grid>
               </Grid>
             </div>
-            <OptionPane />
-            <ButtonGroup />
+            <OptionPane getPhotoTime={getPhotoTime} getDuration={getDuration} />
+            <div id="buttonDiv">
+              <Typography
+                id="missing-field"
+                style={{ display: "none", color: "red" }}
+                variant="body1"
+              >
+                <b>Please fill in all fields.</b>
+              </Typography>
+              <Button
+                id="startButton"
+                variant="contained"
+                color="primary"
+                onClick={start}
+              >
+                Start
+              </Button>
+            </div>
           </Grid>
-          <Grid item xs={0} lg={1}>
+          <Grid item lg={1}>
             {/* spacer */}
           </Grid>
         </Grid>

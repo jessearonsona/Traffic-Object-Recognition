@@ -2,11 +2,15 @@
   margin-top: 70px;
 }
 
+.inputField {
+  min-width: 300px;
+}
+
 .row:hover {
   background-color: #e9e9e9 !important;
 }
 
-.row:nth-of-type(even){
+.row:nth-of-type(even) {
   background-color: #f1f1f1;
 }
 
@@ -30,6 +34,18 @@
   position: absolute;
   right: 5px;
   margin-bottom: 15px;
+}
+
+#current-password-label {
+  text-align: center;
+  margin-right: 5px;
+}
+#hidden-password {
+  text-align: left;
+  -webkit-text-security: disc;
+}
+#visible-password {
+  text-align: left;
 }
 
 @media only screen and (max-width: 600px) {
