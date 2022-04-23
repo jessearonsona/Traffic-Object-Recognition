@@ -32,7 +32,7 @@ function App() {
             <Route path="/conditions" element={<Conditions />} />
             <Route path="/admin" element={<Admin />} />
           </Route>
-        <Route path="/running/" element={<Running />} />
+          <Route path="/running/" element={<Running />} />
         </Route>
       </Routes>
     </ThemeProvider>

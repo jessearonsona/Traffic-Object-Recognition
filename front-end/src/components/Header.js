@@ -45,23 +45,27 @@ const Header = (props) => {
     <div id="siteHeader">
       <div id="headerTop">
         <img src={logo} id="headerLogo" alt="NDSU" />
-        {!isLoginPage(pathname) && (
-          <div className="dropdown">
-            <IconButton id="accountIcon" className="dropbtn">
-              <AccountCircleIcon fontSize="large" />
-            </IconButton>
-            <div className="dropdown-content">
-              {showAdminOption() && (
-                <a onClick={() => handleAdminRedirect()}> Admin Page </a>
-              )}
-              <a href="http://localhost:3000" onClick={handleLogout}>
-                Logout
-              </a>
+        <div id="headerBottom">
+          Upper Great Plains Transportation Institute
+          {!isLoginPage(pathname) && (
+            <div className="dropdown">
+              <div className="move_right">
+                <IconButton id="accountIcon" className="dropbtn">
+                  <AccountCircleIcon fontSize="large" />
+                </IconButton>
+              </div>
+              <div className="dropdown-content">
+                {showAdminOption() && (
+                  <a onClick={() => handleAdminRedirect()}> Admin Page </a>
+                )}
+                <a href="http://localhost:3000" onClick={handleLogout}>
+                  Logout
+                </a>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
-      <div id="headerBottom">Upper Great Plains Transportation Institute</div>
     </div>
   );
 };
