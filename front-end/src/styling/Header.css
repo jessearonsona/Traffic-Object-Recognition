@@ -31,7 +31,6 @@
   overflow: auto;
 }
 
-
 @media screen and (max-width: 500px) {
   .alignIcon a {
     float: none;
@@ -52,7 +51,6 @@
   float: right;
   position: relative;
   display: inline-block;
-  
 }
 
 .dropbtn:hover,
@@ -63,6 +61,7 @@
 .dropdown-content {
   display: none;
   position: absolute;
+  color: black;
   background-color: #f1f1f1;
   min-width: 160px;
   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
@@ -90,10 +89,9 @@
 }
 
 .move_right {
-  display:flex;
+  display: flex;
   flex-direction: row;
   justify-content: flex-end;
-  margin-right: -1.0rem;
+  margin-right: -1rem;
   margin-top: -1.8rem;
 }
-
