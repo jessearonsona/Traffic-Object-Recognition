@@ -187,7 +187,6 @@ const Running = () => {
     });
 
     // Redirect
-    // window.location.replace("/" + model);
     navigate("/" + model);
   }
 
