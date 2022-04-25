@@ -94,37 +94,23 @@ const Tracking = () => {
     setLine(data);
   }, []);
 
-  // Validate and redirect to running page
-  function start() {
-    if (videoRef != null && validate()) {
-      navigate("/running", {
-        state: {
-          model: location.pathname.substring(1),
-          road: road,
-          reportTime: reportTime,
-          duration: duration,
-          direction: direction,
-          line: line,
-        },
-      });
-    }
-
 
   // Checks that all fields are filled in
   function validate() {
     if (duration === "" || isNaN(parseFloat(duration))) {
+      document.getElementById("missing-field").style.display = "block";
       return false;
     } else if (road === "") {
+          document.getElementById("missing-field").style.display = "block";
       return false;
     } else if (reportTime === "" || isNaN(parseFloat(reportTime))) {
+          document.getElementById("missing-field").style.display = "block";
       return false;
     } else if (direction === "") {
+          document.getElementById("missing-field").style.display = "block";
       return false;
     } else return !(line === "");
 
-   // else {
-    //  document.getElementById("missing-field").style.display = "block";
-    //}
   }
 
   // Called when file is uploaded
