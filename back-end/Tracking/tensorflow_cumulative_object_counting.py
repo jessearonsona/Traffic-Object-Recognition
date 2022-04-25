@@ -5,7 +5,6 @@ import tensorflow as tf
 import dlib
 import datetime
 import csv
-import time
 
 from object_detection.utils import label_map_util
 from object_detection.utils import ops as utils_ops
@@ -60,9 +59,8 @@ def run_inference_for_single_image(model, image):
 
     return output_dict
 
-def generate_report(report_variables, report_path, report_name, report_number):
-    report_complete_path = report_path + '\\' + str(report_number) + report_name + '.csv'
-    with open(report_complete_path, 'w', newline='') as csvfile:
+def generate_report(report_variables, report_path):
+    with open(report_path, 'w', newline='') as csvfile:
         fieldnames = ['TimeStamp', 'Class', 'Direction']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
@@ -70,7 +68,7 @@ def generate_report(report_variables, report_path, report_name, report_number):
             writer.writerow({'TimeStamp': item["time_stamp"], 'Class': item["class"], 'Direction': item["direction"]})
     return
 
-def run_inference(model, category_index, cap, labels, roi_position=0.6, threshold=0.5, x_axis=True, skip_frames=20, save_path='', report_path='', report_name='report', report_frequency=15, duration=0, show=True):  
+def run_inference(model, category_index, cap, labels, roi_position=0.6, threshold=0.5, x_axis=True, skip_frames=20, save_path='', report_path='', show=True):  
     counter = [0, 0, 0, 0]  # left, right, up, down
     total_frames = 0
 
@@ -80,8 +78,6 @@ def run_inference(model, category_index, cap, labels, roi_position=0.6, threshol
 
     # Variables to generate report.csv
     report_variables = []
-    report_start_time = time.time()
-    report_number = 1
     
 
     # Check if results should be saved
@@ -105,18 +101,6 @@ def run_inference(model, category_index, cap, labels, roi_position=0.6, threshol
         classes = []
 
         if total_frames % skip_frames == 0:
-            #Check if it is time to generate a report
-            elapsed_time = time.time() - report_start_time
-            if(report_path and elapsed_time > report_frequency * 60):
-                if(elapsed_time > duration * 60): # if it's over the duration exit the while loop (where a final report will be generated)
-                    break
-                generate_report(report_variables, report_path, report_name, report_number)
-                report_variables = []
-                report_number = report_number + 1
-                report_start_time = time.time()
-
-
-
             status = "Detecting"
             trackers = [] # [ {tracker: dlibTracerCorObject, label: 'truck'},
                           #   {tracker: dlibTrackerC..., label: 'car'} ]
@@ -156,7 +140,7 @@ def run_inference(model, category_index, cap, labels, roi_position=0.6, threshol
             if to is None:
                 to = TrackableObject(objectID, centroid)
             else:
-                current_time = str(datetime.datetime.now())
+                current_time = datetime.datetime.now()
                 current_class = category_index[centroid[2]]["name"]
                 if x_axis and not to.counted:
                     x = [c[0] for c in to.centroids]
@@ -227,9 +211,8 @@ def run_inference(model, category_index, cap, labels, roi_position=0.6, threshol
 
         total_frames += 1
 
-    # a report is also generated at the end
     if report_path:
-        generate_report(report_variables, report_path, report_name, report_number)
+        generate_report(report_variables, report_path)
 
     cap.release()
     if save_path:
@@ -263,12 +246,6 @@ if __name__ == '__main__':
                         help='Path to save the output. If None output won\'t be saved')
     parser.add_argument('-sr', '--report_path', type=str, default='',
                         help='Path to save the report. If None report won\'t be saved')
-    parser.add_argument('-rn', '--report_name', type=str, default='report',
-                        help='Report name. If None the report will be named report')
-    parser.add_argument('-rf', '--report_frequency', type=int, default=15,
-                        help='How often generate report. If None report will be generated every 15 minutes')
-    parser.add_argument('-d', '--duration', type=int, default=0,
-                        help='Duration of tracking. If None script must be stopped manually')
     args = parser.parse_args()
 
     detection_model = load_model(args.model)
@@ -285,4 +262,4 @@ if __name__ == '__main__':
 
     run_inference(detection_model, category_index, cap, labels=args.labels, threshold=args.threshold,
                   roi_position=args.roi_position, x_axis=args.axis, skip_frames=args.skip_frames, save_path=args.save_path,
-                   report_path=args.report_path, report_name=args.report_name, report_frequency=args.report_frequency, duration=args.duration, show=args.show)
+                   report_path=args.report_path, show=args.show)
