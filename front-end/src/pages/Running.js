@@ -97,7 +97,7 @@ const Running = () => {
 
       // If running conditions and time to run model
       let testTime = reportTime * 60000;
-      if (model === "Conditions" && time % testTime === 0) {
+      if (time % testTime === 0) {
         runConditionsModel();
       }
 
@@ -116,15 +116,10 @@ const Running = () => {
     setDuration(location.state.duration);
     setRoad(location.state.road);
 
-    if (location.state.model === "Conditions") {
+
       setTitle("Running Road Conditions");
       setReportTime(location.state.photoTime);
-    } else if (location.state.model === "Tracking") {
-      setTitle("Counting Vehicles");
-      setReportTime(location.state.reportTime);
-      setDirection(location.state.direction);
-      setLine(location.state.line);
-    }
+
   }
 
   // Initialize
