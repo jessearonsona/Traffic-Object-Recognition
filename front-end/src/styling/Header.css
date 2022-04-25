@@ -31,7 +31,6 @@
   overflow: auto;
 }
 
-<meta name="viewport" content="initial-scale=1, width=device-width" />
 @media screen and (max-width: 500px) {
   .alignIcon a {
     float: none;
@@ -41,7 +40,7 @@
 
 .dropbtn {
   float: right;
-  background-color: #18563e;
+  background-color: #484848;
   color: white;
   padding: 16px;
   font-size: 16px;
@@ -52,7 +51,6 @@
   float: right;
   position: relative;
   display: inline-block;
-  
 }
 
 .dropbtn:hover,
@@ -63,6 +61,7 @@
 .dropdown-content {
   display: none;
   position: absolute;
+  color: black;
   background-color: #f1f1f1;
   min-width: 160px;
   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
@@ -73,7 +72,7 @@
   padding: 12px 16px;
   text-decoration: none;
   display: block;
-  overflow-wrap: anywhere;
+  margin-right: 1.5rem;
 }
 
 .dropdown-content a:hover {
@@ -82,9 +81,17 @@
 
 .dropdown:hover .dropdown-content {
   display: block;
+  left: -135%;
 }
 
 .dropdown:hover .dropbtn {
   background-color: #3e8e41;
 }
 
+.move_right {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  margin-right: -1rem;
+  margin-top: -1.8rem;
+}
