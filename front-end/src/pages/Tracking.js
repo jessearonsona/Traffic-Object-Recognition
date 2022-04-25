@@ -29,6 +29,7 @@ const Tracking = () => {
     // Compatible file types
     const imageTypes = ["jpg", "jpeg", "png"]
     const videoTypes = ["mp4", "mkv", "wmv", "mov"]
+    const [command, setCommand] = useState(null);
 
     // Get all info from child components
     const getDuration = useCallback((data) => {
@@ -49,26 +50,27 @@ const Tracking = () => {
 
     function getTrackingCommand(){
 
-        var path = " .\\back-end\\Tracking\\";
+        const path = " back-end\\Tracking\\";
 
-        var model = " -m " + path + "saved_model";
+        const model = " -m " + path + "saved_model";
 
-        var label = " -l " + path + "\\four_class_label_map.pbtxt";
+        const label = " -l " + path + "four_class_label_map.pbtxt";
 
-        var savePath = " -sp " + path + "\\saves\\output.avi";
+        const savePath = " -sp " + path + "saves\\output.avi";
 
-        var threshold = " -t " + "0.2";
+        const threshold = " -t " + "0.2";
 
-        var roiPosition = " -roi " + "notImplemented"; //this will need the line thingy that dalton is making
+        const roiPosition = " -roi " + "0.5"; //TODO
 
-        var reportFrequency = " -rf " + reportTime;
+        const reportFrequency = " -rf " + reportTime;
 
-        var detectionDuration = " -d " + duration;
+        const detectionDuration = " -d " + duration;
 
-        var command = "python" + path + "tensorflow_cumulative_object_counting.py" 
+        const comm = "python" + path + "tensorflow_cumulative_object_counting.py" 
                 + model + label + savePath + threshold + roiPosition;
-
-        alert(command);
+        console.log("Comm: ",comm)
+        setCommand(comm)
+        console.log("Command: ", command)
     }
 
     // Validate and redirect to running page
@@ -165,6 +167,18 @@ const Tracking = () => {
                 videoRef.current.srcObject = stream;
             });
         }
+    }
+
+    const CommandComponent = () => {
+      if (!command) {
+        return (
+          <code>Press start to display the correct python command</code>
+        )
+      }
+
+      return (
+        <code>{command}</code>
+      )
     }
 
     return (
@@ -282,6 +296,7 @@ const Tracking = () => {
                                 </Grid>
                             </Grid>
                         </div>
+                        <CommandComponent />
                         <OptionPane getReportTime={getReportTime} getDuration={getDuration} getDirection={getDirection}
                                     getLine={getLine}/>
                         <div id="buttonDiv">
