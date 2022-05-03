@@ -1,5 +1,11 @@
 "# Trafic-Object-Recognition" 
 
+## To start the Road Condition Model
+Open a terminal in the project directory, navigate to the back-end folder then models then road-conditions and run:
+### 'http-server -c1 --cors . '
+This command hosts the model for the website to grab
+
+
 ## Diagrams depicting the flow of the web app are located in the web-app-diagrams folder (made with draw.io and can be viewed in VS Code by installing the draw.io extension)
 
 
@@ -39,5 +45,3 @@ In dbFiles/dbOperations.js
     - getUsers() retrieves all registered users and the query currently orders them alphabetically by first name
 
     - addUser() adds a new user to the database contains code to hash the password prior to storing it.  This code is currently commented out because it cannot be decoded for display on the admin page (as there is no way to decrypt it after it has been hashed)
-
-
