@@ -27,8 +27,8 @@ function App() {
           {/* Public Routes*/}
           <Route path="/" element={<Login />} />
           {/* Protected Routes*/}
-          <Route element={<RequireAuth />}>
             <Route path="/tracking" element={<Tracking />} />
+          <Route element={<RequireAuth />}>
             <Route path="/conditions" element={<Conditions />} />
             <Route path="/admin" element={<Admin />} />
           </Route>

@@ -50,8 +50,11 @@ const Subheader = (props) => {
   // Get all roads/intersections where cameras are located
   const populateRoadDropdown = async () => {
     try {
-      const response = await axios.get("/api/roads");
-      setRoadData(response.data);
+        const x = {
+            Stations_Name: "Street",
+            Station_Number: "10",
+        }
+        setRoadData([x])
     } catch (error) {
       console.log(error);
     }
