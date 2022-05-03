@@ -31,30 +31,36 @@ const Tracking = () => {
 
   const showAdminOption = localStorage.getItem("admin");
 
-    function getTrackingCommand(){
+  function getTrackingCommand(){
 
-        const path = " back-end\\Tracking\\";
+    const path = " back-end\\Tracking\\";
 
-        const model = " -m " + path + "saved_model";
+    const model = " -m " + path + "saved_model";
 
-        const label = " -l " + path + "four_class_label_map.pbtxt";
+    const label = " -l " + path + "four_class_label_map.pbtxt";
 
-        const savePath = " -sp " + path + "saves\\output.avi";
+    const savePathReport = " -sr " + path + "saves\\";
 
-        const threshold = " -t " + "0.2";
+    const reportName = " -rn " + "report";
 
-        const roiPosition = " -roi " + "0.5"; //TODO
+    const threshold = " -t " + "0.2";
 
-        const reportFrequency = " -rf " + reportTime;
+    const roiPosition = " -roi " + "0.5"; 
 
-        const detectionDuration = " -d " + duration;
+    const reportFrequency = " -rf " + reportTime;
 
-        const comm = "python" + path + "tensorflow_cumulative_object_counting.py" 
-                + model + label + savePath + threshold + roiPosition;
+    const detectionDuration = " -d " + duration;
+    
+    let orientation = ""
 
-        setCommand(comm)
+    if (line == "horizontal") orientation = " -a "
 
-    }
+    const comm = "python" + path + "tensorflow_cumulative_object_counting.py" 
+            + model + label + savePathReport + reportName + threshold + roiPosition + reportFrequency + detectionDuration + orientation;
+
+    setCommand(comm)
+
+  }
 
     // Validate and redirect to running page
     function start() {
