@@ -39,18 +39,24 @@ const Tracking = () => {
 
         const label = " -l " + path + "four_class_label_map.pbtxt";
 
-        const savePath = " -sp " + path + "saves\\output.avi";
+        const savePathReport = " -sr " + path + "saves\\";
+
+        const reportName = " -rn " + "report";
 
         const threshold = " -t " + "0.2";
 
-        const roiPosition = " -roi " + "0.5"; //TODO
+        const roiPosition = " -roi " + "0.5"; 
 
         const reportFrequency = " -rf " + reportTime;
 
         const detectionDuration = " -d " + duration;
+        
+        let orientation = ""
+
+        if (line == "horizontal") orientation = " -a "
 
         const comm = "python" + path + "tensorflow_cumulative_object_counting.py" 
-                + model + label + savePath + threshold + roiPosition;
+                + model + label + savePathReport + reportName + threshold + roiPosition + reportFrequency + detectionDuration + orientation;
 
         setCommand(comm)
 
