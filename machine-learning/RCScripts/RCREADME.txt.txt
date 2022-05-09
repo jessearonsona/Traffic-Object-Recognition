@@ -15,7 +15,7 @@ Outputs: The model, post training process, will be saved at the given save locat
 
 
 #train_RCModel.py
-This scripts takes in 3 arguements and will run a single trainign session on a given model. After the training is done this script
+This script takes in 3 arguements and will run a single trainign session on a given model. After the training is done this script
 will save the model post training over the model beforehand.
 
 Input Arguments: --train_dir, the directory of your training tensorflow records
@@ -23,3 +23,10 @@ Input Arguments: --train_dir, the directory of your training tensorflow records
 --model_loc, the link or directory location of a model you wish to train, will also be used to save the model
 
 Outputs: The model, post training process, will be saved at the given model location, replacing the previous one. 
+
+#TFRecordMaker.py
+This script will be given a folder location with multiple folders that act as sorted image classifications and will create
+TFRs with the given images and save them to a given location
+
+Input Arguments: --data_dir, the directory of your folders acting as labels for the images inside of them
+--output_dir, the directory of which you want the TFRecords to be saved
