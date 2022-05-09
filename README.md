@@ -1,4 +1,4 @@
-"# Trafic-Object-Recognition" 
+"#Trafic-Object-Recognition" 
 
 ## To start the Road Condition Model
 Open a terminal in the project directory, navigate to the back-end folder then models then road-conditions and run:
