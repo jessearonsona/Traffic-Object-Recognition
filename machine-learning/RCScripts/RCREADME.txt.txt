@@ -1,5 +1,7 @@
 Requirements: tensorflow, python, matplotlib, numpy
 
+For conversation please refer to the github here: https://github.com/tensorflow/tfjs/tree/master/tfjs-converter Use Tensorflow saved model and defaults. 
+
 This file does a quick explanation of the scripts found here for the RCmodel, including the parameters they take in, their outputs, and what they do. 
 
 #create_RCModel.py
